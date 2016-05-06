@@ -4,6 +4,7 @@
  * Henry S. Suzukawa
  * Victor Rozzatti Tornisiello
  */
+ //http://lazyfoo.net/SDL_tutorials/
 
 #include <stdio.h>
 #include <math.h>
