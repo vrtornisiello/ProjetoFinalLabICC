@@ -1,6 +1,6 @@
 /* Projeto Final Lab ICC 016
  * The Gray Spaceship
- * Carlos ...
+ * Carlos Roberto dos Santos Junior
  * Henry S. Suzukawa
  * Vitor
  */
