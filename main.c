@@ -4,13 +4,16 @@
  * Henry S. Suzukawa
  * Victor Rozzatti Tornisiello
  */
+
+// https://wiki.libsdl.org/FrontPage
+// http://lazyfoo.net/SDL_tutorials/
  
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <math.h>
 
 typedef struct nave {
- int x, y; // posição
+	int x, y; // posição
  float ang; // angulo radiano
 } Nave;
 
@@ -38,10 +41,26 @@ void draw(){
  // desenha o cenário
 }
 
-int main(){
- SDL_Event e;
- do {
+int main()
+{
+ Nave nave;
+ Obj meteoro[1];
+ Obj laser;
+ SDL_Event e; // Evento do SDL
+ char init = 'r'; // Variável para manter o prog rodando
+ while( init == 'r' ) {
   draw();
-  SDL_PollEvent(&e)
- } while (e.type != SDL_QUIT);
+  
+  while( SDL_PollEvent(&e) )
+  {
+   switch( e.type )
+   {
+    case SDL_QUIT:
+     init = 'p';
+     break;
+   }
+  }
+  
+ }
+ close();
 }
