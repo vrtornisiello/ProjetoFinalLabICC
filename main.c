@@ -4,8 +4,8 @@
  * Henry S. Suzukawa
  * Victor Rozzatti Tornisiello
  */
- //http://lazyfoo.net/SDL_tutorials/
-
+ 
+#include <SDL2/SDL.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -39,6 +39,9 @@ void draw(){
 }
 
 int main(){
- draw();
- 
+ SDL_Event e;
+ do {
+  draw();
+  SDL_PollEvent(&e)
+ } while (e.type != SDL_QUIT);
 }
