@@ -15,13 +15,22 @@ typedef struct nave {
 
 typedef struct objeto { // meteoro ou laser
  int x, y; // posição
- float ang; // coeficientes da reta que o obj vai seguir.. y = ax + b radiano
- int b;
+ float coefA; // coeficientes da reta que o obj vai seguir.. y = ax + b radiano
+ int coefL;
 } Obj;
 
-int reta(a, b, x) {
+int reta(float coefA, int coefL, int x) {
  // https://www.codecogs.com/library/computing/c/math.h/round.php
- return round(a*x + b); // arredonda o resultado (0.5+ -> 1)
+ return round(coefA*x + coefL); // arredonda o resultado (0.5+ -> 1)
+}
+
+float calcTan(int x0, int y0, int x1, int y1) { // tangente dos pontos
+ return (y1 - y0)/(x1 - x0);
+}
+
+float calcAng(int x0, int y0, int x1, int y1) { // angulo
+ // http://www.cplusplus.com/reference/cmath/atan2/
+ return atan2(x1 - x0, y1 - y0);
 }
 
 void draw(){
