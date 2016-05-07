@@ -8,10 +8,11 @@
 // https://wiki.libsdl.org/FrontPage
 // http://lazyfoo.net/SDL_tutorials/
 
+#define NAME "The Gray Spaceship"
 #define WINDOWS_SIZE_X 800
 #define WINDOWS_SIZE_Y 600
 #define SIZE_X 800
-#define SIZE_X 600
+#define SIZE_Y 600
 #define LASER_SIZE_X 15
 #define LASER_SIZE_Y 5
 
@@ -20,8 +21,7 @@
 #include <math.h>
 
 typedef struct coordinate {
-	int x = 0,
-	    y = 0;
+	int x, y;
 } Coordinate;
 
 typedef struct nave {
@@ -80,27 +80,20 @@ void handleSDLEvents(Nave* nave, Obj* mouse, Obj* laser) {
 			break;
 			
 			case SDL_MOUSEMOTION:
-			mouse->x = e.x;
-			mouse->y = e.y;
 			break;
 			// https://wiki.libsdl.org/SDL_MouseButtonEvent
 			case SDL_MOUSEBUTTONDOWN:
-			if( e.button == SDL_BUTTON_LEFT ) {
-				if( isValidPos(laser->x - 20, laser->y - 20) == 'n' ) {
-					laser->x0 = e.x;
-					laser->y0 = e.y;
-					laser->x = e.x;
-					laser->y = e.y;
-					laser->coefA = calcTan(e.x, e.y, nave.x, nave.y);
-					laser->coefL = nave.y - nave.x * (laser->coefA);
-				}
-			}
 			break;
 		}
 	}
 }
 
 int main() {
+	SDL_Window window;
+	SDL_Renderer renderer;
+	
+	initSDL( &window, &renderer );
+	
 	Coordinate mouse;
 	Nave nave;
 	Obj meteoro[1];
