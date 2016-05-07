@@ -73,6 +73,7 @@ void draw(){
 
 void handleSDLEvents(Nave* nave, Obj* mouse, Obj* laser) {
 	SDL_Event e; // Evento do SDL
+	// https://www.libsdl.org/release/SDL-1.2.15/docs/html/sdlevent.html
 	while( SDL_PollEvent(&e) ) {
 		switch( e.type ) {
 			case SDL_QUIT:
