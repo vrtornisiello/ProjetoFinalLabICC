@@ -27,6 +27,7 @@ int main(char argc, char* argv[]) {
 				break;
 			}
 		}
+	}
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
