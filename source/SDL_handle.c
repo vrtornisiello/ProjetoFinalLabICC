@@ -27,7 +27,7 @@ int initSDL(SDL_Window** window, SDL_Renderer** renderer) {
 	}
 
 	if( TTF_Init() < 0 ) {
-		fprintf( stderr, "Erro ao iniciar o SDL_Init: &s\n", TTF_GetError());
+		fprintf( stderr, "Erro ao iniciar o SDL_Init: %s\n", TTF_GetError());
 		return -3;
 	}
 
