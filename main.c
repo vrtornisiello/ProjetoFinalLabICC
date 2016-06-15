@@ -16,6 +16,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
+#include"header.h
 
 #define WINDOW_TITLE  "The Gray Spaceship"
 #define WINDOW_SIZE_X 640
@@ -81,12 +82,12 @@ int initSDL(SDL_Window** window, SDL_Renderer** renderer) {
 	}
 
 	if( !IMG_Init( IMG_INIT_PNG ) ) {
-		fprintf( stderr, "Erro ao iniciar o SDL_image: %s\n", IMG_GetError() );
+		fprintf( stderr, "Erro ao iniciar o SDL_image: %s\n", IMG_GetError());
 		return -2;
 	}
 
 	if( TTF_Init() < 0 ) {
-		fprintf( stderr, "Erro ao iniciar o SDL_Init.\n");
+		fprintf( stderr, "Erro ao iniciar o SDL_Init: &s\n", TTF_GetError());
 		return -3;
 	}
 
