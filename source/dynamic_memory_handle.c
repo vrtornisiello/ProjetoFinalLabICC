@@ -1,5 +1,5 @@
 #include"../header.h"
-
+/*
 int addTexturePointer( struct texturePointers* texture, SDL_Texture* elem, int jumpSize ) {
 	// adiciona um elemento à uma array ^ (ela aumenta de tamanho se necessário)
 	if( jumpSize > 0 ) {
@@ -22,7 +22,7 @@ int addTexturePointer( struct texturePointers* texture, SDL_Texture* elem, int j
 	fprintf(stderr, "ERRO: addTexturePointer(), invalid argument jumpSize (%d).\n", jumpSize);
 	return -1;
 }
-
+*/
 
 int addToList( List* list, void* elem, int jumpSize ) {
 	if( jumpSize > 0 ) {

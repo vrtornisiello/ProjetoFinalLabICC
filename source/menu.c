@@ -10,14 +10,16 @@ void getMaxDim( Dimension* dim, int len, Dimension* dest ) {
 	}
 }
 
-void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clock_t* runtime, int* screen, struct texturePointers* textures ) {
+void drawMenu( SDL_Window* window, SDL_Renderer* renderer,
+				SDL_Texture* texture[], TTF_Font* font[],
+					clock_t* runtime, int* screen ) {
 	SDL_Color color = {255,255,255};
 	SDL_Texture* txt[5] = {NULL};
-	txt[0] = LoadTxtTexture(renderer, font[0], "Menu", &color, textures);
-	txt[1] = LoadTxtTexture(renderer, font[1], "SinglePlayer", &color, textures);
-	txt[2] = LoadTxtTexture(renderer, font[1], "MultiPlayer", &color, textures);
-	txt[3] = LoadTxtTexture(renderer, font[1], "Return", &color, textures);
-	txt[4] = LoadTxtTexture(renderer, font[1], "Close", &color, textures);
+	txt[0] = LoadTxtTexture(renderer, font[FONT_INDEX_BIG], "Menu", &color);
+	txt[1] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "SinglePlayer", &color);
+	txt[2] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "MultiPlayer", &color);
+	txt[3] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "Return", &color);
+	txt[4] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "Close", &color);
 
 	Dimension dim[5] = {0};
 	int i;
@@ -34,7 +36,7 @@ void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clo
 	getMaxDim(dim, 5, &button_dim);
 	button_dim.w += 20;
 	button_dim.h -= 20	;
-	int selectedButton[4] = {0};
+	int selectedButton = -1;
 
 	// título
 	rect[0].x = (WINDOW_SIZE_X - dim[0].w)/2;
@@ -62,27 +64,28 @@ void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clo
 
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
 	    SDL_RenderClear( renderer ); // Limpa a tela
+
 		while( SDL_PollEvent(&e) ) {
 			switch( e.type ) {
 				case SDL_QUIT:
-					closeALL(window, renderer, textures, font);
+					closeALL(window, renderer, texture, font);
 					exit(0);
 				break;
 			    case SDL_MOUSEMOTION:
 			    	SDL_GetMouseState(&(mouse.x), &(mouse.y));
 			    break;
 		        case SDL_MOUSEBUTTONUP:
-					if( selectedButton[0] ) {
+					if( selectedButton == 0 ) {
 						printf("SinglePlayer\n");
 						*screen = 1;
-					} else if( selectedButton[1] ) {
+					} else if( selectedButton == 1 ) {
 						printf("MultiPlayer\n");
 						*screen = 2;
-					} else if( selectedButton[2] ) {
+					} else if( selectedButton == 2 ) {
 						printf("Return\n");
 						*screen = 6;
-					} else if( selectedButton[3] ) {
-						closeALL(window, renderer, textures, font);
+					} else if( selectedButton == 3 ) {
+						closeALL(window, renderer, texture, font);
 						exit(0);
 					}
 				break;
@@ -91,14 +94,14 @@ void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clo
 
 		SDL_RenderCopy(renderer, txt[0], NULL, &(rect[0]));
 
+		selectedButton = -1;
 		for( i = 1; i < 5; i++ ) { // botões
 			if((mouse.x > background_rect[i-1].x) && (mouse.x < background_rect[i-1].x + background_rect[i-1].w)
 			&& (mouse.y > background_rect[i-1].y) && (mouse.y < background_rect[i-1].y + background_rect[i-1].h)) {
-				selectedButton[i-1] = 1;
+				selectedButton = i-1;
 				SDL_SetRenderDrawColor(renderer, 200,0,0,255);
 				SDL_RenderFillRect(renderer, &(background_rect[i-1]));
 			} else {
-				selectedButton[i-1] = 0;
 				SDL_SetRenderDrawColor(renderer, 50,50,50,255);
 				SDL_RenderFillRect(renderer, &(background_rect[i-1]));
 			}
@@ -116,13 +119,16 @@ void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clo
 	if(txt[4]) SDL_DestroyTexture(txt[4]);
 }
 
-void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
-					clock_t* runtime, int* screen, struct texturePointers* textures ) {
+
+
+void drawInitUser( SDL_Window* window, SDL_Renderer* renderer,
+					SDL_Texture* texture[], TTF_Font* font[],
+						clock_t* runtime, int* screen ) {
 	SDL_Color color = {255,255,255};
-	SDL_Texture* txt[3] = {NULL};
-	txt[0] = LoadTxtTexture(renderer, font[1], "User ID", &color, textures);
-	txt[1] = LoadTxtTexture(renderer, font[1], "Voltar", &color, textures);
-	txt[2] = LoadTxtTexture(renderer, font[1], "Iniciar", &color, textures);
+	SDL_Texture* txt[3] = {NULL}; 
+	txt[0] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "User ID", &color);
+	txt[1] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "Voltar", &color);
+	txt[2] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "Iniciar", &color);
 
 	Dimension dim[3] = {0};
 	if(SDL_QueryTexture(txt[0], NULL, NULL, &(dim[0].w), &(dim[0].h)) < 0) {
@@ -189,7 +195,7 @@ void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
 		while( SDL_PollEvent(&e) ) {
 			switch( e.type ) {
 				case SDL_QUIT:
-					closeALL(window, renderer, textures, font);
+					closeALL(window, renderer, texture, font);
 					exit(0);
 				break;
 				case SDL_KEYDOWN:
@@ -204,7 +210,7 @@ void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
 						inputLen += strlen(e.text.text);
 						input[inputLen] = '\0';
 						hasChangedInput = 1;
-						printf("%s %d %li\n", input, inputLen, strlen(e.text.text));
+//						printf("%s %d %li\n", input, inputLen, strlen(e.text.text));
 					}
 				break;
 				case SDL_MOUSEBUTTONUP:
@@ -257,7 +263,7 @@ void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
 		if(hasChangedInput) {
 			if(inputTexture) SDL_DestroyTexture(inputTexture);
 
-			inputTexture = LoadTxtTexture(renderer, font[1], input, &color, NULL);
+			inputTexture = LoadTxtTexture(renderer, font[1], input, &color);
 			if(SDL_QueryTexture(inputTexture, NULL, NULL, &(dim_Input.w), &(dim_Input.h)) < 0) {
 				fprintf(stderr, "%s\n", SDL_GetError());
 			}
@@ -284,6 +290,7 @@ void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
 	if(txt[0]) SDL_DestroyTexture(txt[0]);
 	if(txt[1]) SDL_DestroyTexture(txt[1]);
 	if(txt[2]) SDL_DestroyTexture(txt[2]);
+	if(inputTexture) SDL_DestroyTexture(inputTexture);
 }
 
 void drawMultiplayer() {

@@ -5,47 +5,13 @@ int main(char argc, char* argv[]) {
 	SDL_Window* window     = NULL;
 	SDL_Renderer* renderer = NULL;
 
-	struct texturePointers textures = {NULL, 1, 0};
-	textures.pointers = malloc(sizeof(SDL_Texture*) * textures.size);
-	if( !(textures.pointers) ) {
-		fprintf(stderr, "Erro ao inicializar o coletor de texturas.\n");
-		return -3;
-	}
+	SDL_Texture* texture[ARRAY_NUM_TEXTURE] = {NULL};
+	TTF_Font* font[ARRAY_NUM_FONT]          = {NULL};
 
-	initSDL(&window, &renderer); // inicializa o SDL
+	initGraphics(&window, &renderer, texture, font);
 
-	SDL_Texture* nave = LoadImageTexture( renderer, PATH_NAVE, &textures );
-	if( !nave ) {
-		closeALL(window, renderer, &textures, NULL);
-		return -2;
-	}
-
-	SDL_Texture* meteor = LoadImageTexture( renderer, PATH_METEOR, &textures );
-	if( !meteor ) {
-		closeALL(window, renderer, &textures, NULL);
-		return -2;
-	}
-
-	SDL_Texture* laser = LoadImageTexture( renderer, PATH_LASER, &textures );
-	if( !laser ) {
-		closeALL(window, renderer, &textures, NULL);
-		return -2;
-	}
-
-	TTF_Font* font[ARRAY_NUM_FONT];
-	font[0] = TTF_OpenFont(PATH_FONT, 30);
-	if( !font[0] ) {
-		closeALL(window, renderer, &textures, NULL);
-		fprintf(stderr, "%s\n", TTF_GetError());
-		return -4;
-	}
-
-	font[1] = TTF_OpenFont(PATH_FONT, 20);
-	if( !font[1] ) {
-		closeALL(window, renderer, &textures, font);
-		fprintf(stderr, "%s\n", TTF_GetError());
-		return -4;
-	}
+	List users, objs;
+	if( initList(&users, &objs) < 0 ) closeALL(window, renderer, texture, font);
 
 	clock_t runtime[2] = {0, 0};
 
@@ -62,18 +28,18 @@ int main(char argc, char* argv[]) {
 				case SDL_QUIT:
 					isRunning = 0;
 
-					closeALL(window, renderer, &textures, font);
+					closeALL(window, renderer, texture, font);
 					return 0;
 				break;
 			}
 		}
 
-		if( screen == 0 ) drawMenu( window, renderer, font, runtime, &screen, &textures );
-		else if( screen == 1 ) drawInitUser( window, renderer, font, runtime, &screen, &textures );
-		else if( screen == 2 ) drawMultiplayer();
-		else if( screen == 3 ) drawGame();
-		else if( screen == 4 ) drawSave();
-		else if( screen == 5 ) drawReturn();
+		if( screen == SCREEN_MENU ) drawMenu( window, renderer, texture, font, runtime, &screen );
+		else if( screen == SCREEN_SINGLE ) drawInitUser( window, renderer, texture, font, runtime, &screen );
+		else if( screen == SCREEN_MULTI ) drawMultiplayer();
+		else if( screen == SCREEN_GAME ) drawGame();
+		else if( screen == SCREEN_SAVE ) drawSave();
+		else if( screen == SCREEN_OPEN ) drawReturn();
 
 		SDL_RenderPresent(renderer);
 
@@ -81,6 +47,66 @@ int main(char argc, char* argv[]) {
 		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
 	}
 
-	closeALL(window, renderer, &textures, font);
+	closeALL(window, renderer, texture, font);
+	return 0;
+}
+
+void initGraphics( SDL_Window** window, SDL_Renderer** renderer, SDL_Texture** texture, TTF_Font** font ) {
+	srand( (unsigned)time(NULL) );
+
+	initSDL(window, renderer); // inicializa o SDL
+
+	texture[TEXTURE_NAVE] = LoadImageTexture( *renderer, PATH_NAVE );
+	if( !texture[TEXTURE_NAVE] ) {
+		closeALL(*window, *renderer, NULL, NULL);
+		exit(-3);
+	}
+
+	texture[TEXTURE_METEOR] = LoadImageTexture( *renderer, PATH_METEOR );
+	if( !texture[TEXTURE_METEOR] ) {
+		closeALL(*window, *renderer, texture, NULL);
+		exit(-3);
+	}
+
+	texture[TEXTURE_LASER] = LoadImageTexture( *renderer, PATH_LASER );
+	if( !texture[TEXTURE_LASER] ) {
+		closeALL(*window, *renderer, texture, NULL);
+		exit(-3);
+	}
+
+	font[FONT_INDEX_BIG] = TTF_OpenFont(PATH_FONT, FONT_SIZE_BIG);
+	if( !font[FONT_INDEX_BIG] ) {
+		closeALL(*window, *renderer, texture, NULL);
+		fprintf(stderr, "%s\n", TTF_GetError());
+		exit(-4);
+	}
+
+	font[FONT_INDEX_MED] = TTF_OpenFont(PATH_FONT, FONT_SIZE_MED);
+	if( !font[FONT_INDEX_MED] ) {
+		closeALL(*window, *renderer, texture, font);
+		fprintf(stderr, "%s\n", TTF_GetError());
+		exit(-4);
+	}
+}
+
+int initList( List* users, List* objs ) {
+	users->len      = 0;
+	users->size     = 1;
+	users->elemSize = sizeof(Nave);
+	users->list     = malloc(sizeof(Nave));
+	if(!(users->list)) {
+		fprintf(stderr, "Erro ao alocar memória (users).\n");
+		return -1;
+	}
+
+	objs->len      = 0;
+	objs->size     = 1;
+	objs->elemSize = sizeof(Obj);
+	objs->list     = malloc(sizeof(Obj));
+	if(!(objs->list)) {
+		fprintf(stderr, "Erro ao alocar memória (objs).\n");
+		return -1;
+	}
+
 	return 0;
 }

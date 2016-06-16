@@ -29,7 +29,11 @@
 #define PATH_METEOR "sprites/meteoro.png"
 #define PATH_LASER  "sprites/laser.png"
 
-#define ARRAY_NUM_FONT 2
+#define ARRAY_NUM_FONT  2
+#define FONT_SIZE_BIG   30
+#define FONT_SIZE_MED   20
+#define FONT_INDEX_BIG  0
+#define FONT_INDEX_MED  1
 
 #define IMG_NAVE_H   200
 #define IMG_NAVE_W   200
@@ -40,6 +44,18 @@
 
 #define MAX_CHAR_NOME 11
 #define SIZE_INPUT    300
+
+#define ARRAY_NUM_TEXTURE 3
+#define TEXTURE_NAVE      0
+#define TEXTURE_METEOR    1
+#define TEXTURE_LASER     2
+
+#define SCREEN_MENU   0
+#define SCREEN_SINGLE 1
+#define SCREEN_MULTI  2
+#define SCREEN_GAME   3
+#define SCREEN_SAVE   4
+#define SCREEN_OPEN   5
 
 typedef struct _point {
 	int x;
@@ -71,32 +87,37 @@ typedef struct _nave {
 	char nome[MAX_CHAR_NOME]; // 10 letras
 } Nave;
 
+/*
 struct texturePointers {
 	SDL_Texture** pointers;
 	int size;
 	int len;
 };
+*/
+typedef struct _list{
+	void* list;
+	int len;
+	int size;
+	unsigned int elemSize;
+} List;
 
-	typedef struct _list{
-		void* list;
-		int len;
-		int size;
-		unsigned int elemSize;
-	} List;
-
-SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path, struct texturePointers* textures);
-SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, SDL_Color* color, struct texturePointers* textures);
 int initSDL(SDL_Window** window, SDL_Renderer** renderer);
+SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path);
+SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, SDL_Color* color);
 void ctrlFramerate( float delta );
-void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture, TTF_Font** font );
+void closeALL( SDL_Window* window, SDL_Renderer* renderer, SDL_Texture** texture, TTF_Font** font );
 
-void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clock_t* runtime, int* screen, struct texturePointers* textures );
-void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
-					clock_t* runtime, int* screen, struct texturePointers* textures );
+void getMaxDim( Dimension* dim, int len, Dimension* dest );
+void drawMenu( SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture[], TTF_Font* font[], clock_t* runtime, int* screen );
+void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture[], TTF_Font* font[], clock_t* runtime, int* screen );
 void drawMultiplayer();
 void drawSave();
 void drawReturn();
+
+int addToList( List* list, void* elem, int jumpSize );
+int removeFromList( List* list, int elemId );
+
 void drawGame();
 
-
-int addTexturePointer( struct texturePointers* texture, SDL_Texture* elem, int jumpSize );
+void initGraphics( SDL_Window** window, SDL_Renderer** renderer, SDL_Texture** texture, TTF_Font** font );
+int initList( List* users, List* objs );
