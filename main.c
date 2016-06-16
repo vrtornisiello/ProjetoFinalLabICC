@@ -5,7 +5,7 @@ int main(char argc, char* argv[]) {
 	SDL_Window* window     = NULL;
 	SDL_Renderer* renderer = NULL;
 
-	struct texturePointers textures = {NULL, 5, 0};
+	struct texturePointers textures = {NULL, 1, 0};
 	textures.pointers = malloc(sizeof(SDL_Texture*) * textures.size);
 	if( !(textures.pointers) ) {
 		fprintf(stderr, "Erro ao inicializar o coletor de texturas.\n");
@@ -16,29 +16,43 @@ int main(char argc, char* argv[]) {
 
 	SDL_Texture* nave = LoadImageTexture( renderer, PATH_NAVE, &textures );
 	if( !nave ) {
-		closeALL(window, renderer, &textures);
+		closeALL(window, renderer, &textures, NULL);
 		return -2;
 	}
 
 	SDL_Texture* meteor = LoadImageTexture( renderer, PATH_METEOR, &textures );
 	if( !meteor ) {
-		closeALL(window, renderer, &textures);
+		closeALL(window, renderer, &textures, NULL);
 		return -2;
 	}
 
 	SDL_Texture* laser = LoadImageTexture( renderer, PATH_LASER, &textures );
 	if( !laser ) {
-		closeALL(window, renderer, &textures);
+		closeALL(window, renderer, &textures, NULL);
 		return -2;
 	}
 
-	clock_t initTime = 0,
-			endTime = 0;
+	TTF_Font* font[ARRAY_NUM_FONT];
+	font[0] = TTF_OpenFont(PATH_FONT, 30);
+	if( !font[0] ) {
+		closeALL(window, renderer, &textures, NULL);
+		fprintf(stderr, "%s\n", TTF_GetError());
+		return -4;
+	}
+
+	font[1] = TTF_OpenFont(PATH_FONT, 20);
+	if( !font[1] ) {
+		closeALL(window, renderer, &textures, font);
+		fprintf(stderr, "%s\n", TTF_GetError());
+		return -4;
+	}
+
+	clock_t runtime[2] = {0, 0};
 
 	SDL_Event e;
 	int isRunning = 1;
 	while( isRunning ) {
-		initTime = clock();
+		runtime[0] = clock();
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
 	    SDL_RenderClear( renderer ); // Limpa a tela
 
@@ -46,27 +60,19 @@ int main(char argc, char* argv[]) {
 			switch( e.type ) {
 				case SDL_QUIT:
 					isRunning = 0;
-					closeALL(window, renderer, &textures);
-//					SDL_DestroyRenderer(renderer);
-//				 	SDL_DestroyWindow(window);
-//					IMG_Quit();
-//					TTF_Quit();
-//					SDL_Quit();
 
-					exit(0);
+					closeALL(window, renderer, &textures, font);
+					return 0;
 				break;
 			}
 		}
 
-		endTime = clock();
-		ctrlFramerate((endTime - initTime)*1000/CLOCKS_PER_SEC);
+		drawMenu( window, renderer, font, runtime );
+
+		runtime[1] = clock();
+		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
 	}
 
-	closeALL(window, renderer, &textures);
-//	SDL_DestroyRenderer(renderer);
-//	SDL_DestroyWindow(window);
-//	IMG_Quit();
-//	TTF_Quit();
-//	SDL_Quit();
+	closeALL(window, renderer, &textures, font);
 	return 0;
 }

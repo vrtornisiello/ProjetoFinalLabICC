@@ -9,11 +9,11 @@ SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path, struct texture
 
 	SDL_Texture* img = SDL_CreateTextureFromSurface(renderer, imgSurface);
 	SDL_FreeSurface(imgSurface);
-	if( !img )
+	if( !img ) {
 		fprintf(stderr, "Erro ao criar textura (img): %s\n", IMG_GetError());
-	else
-		addTexturePointer(textures, img, 5); // adiciona o ponteiro da textura ao array
-											// para depois remover tudo junto
+	} else {
+		if(textures) addTexturePointer(textures, img, 5); // adiciona o ponteiro da textura ao array
+	}										// para depois remover tudo junto
 
 	return img;
 }
@@ -26,11 +26,12 @@ SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, S
 	}
 	SDL_Texture* txt_texture = SDL_CreateTextureFromSurface( renderer, auxSurface );
 	SDL_FreeSurface(auxSurface);
-	if( !txt_texture )
+	if( !txt_texture ) {
 		fprintf(stderr, "Erro ao criar textura (font): %s\n", SDL_GetError());
-	else
-		addTexturePointer(textures, txt_texture, 5); // adiciona o ponteiro da textura ao array
-											// para depois remover tudo junto
+	} else {
+		if(textures) addTexturePointer(textures, txt_texture, 5); // adiciona o ponteiro da textura ao array
+	}
+										// para depois remover tudo junto
 	return txt_texture;
 }
 
@@ -42,11 +43,14 @@ int initSDL(SDL_Window** window, SDL_Renderer** renderer) {
 	}
 
 	if( !IMG_Init( IMG_INIT_PNG ) ) {
+		SDL_Quit();
 		fprintf( stderr, "Erro ao iniciar o SDL_image: %s\n", IMG_GetError());
 		return -2;
 	}
 
 	if( TTF_Init() < 0 ) {
+		IMG_Quit();
+		SDL_Quit();
 		fprintf( stderr, "Erro ao iniciar o SDL_Init: %s\n", TTF_GetError());
 		return -3;
 	}
@@ -54,8 +58,8 @@ int initSDL(SDL_Window** window, SDL_Renderer** renderer) {
 	*window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED, WINDOW_SIZE_X, WINDOW_SIZE_Y, SDL_WINDOW_SHOWN);
 	if( !(*window) ) {
-		IMG_Quit();
 		TTF_Quit();
+		IMG_Quit();
 		SDL_Quit();
 		fprintf(stderr,
 			"Nao foi possivel abrir a janela: %s\n", SDL_GetError());
@@ -65,8 +69,8 @@ int initSDL(SDL_Window** window, SDL_Renderer** renderer) {
 	*renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
 	if( !(*renderer) ) {
 		SDL_DestroyWindow(*window);
-		IMG_Quit();
 		TTF_Quit();
+		IMG_Quit();
 		SDL_Quit();
 
 		fprintf(stderr,
@@ -85,15 +89,20 @@ void ctrlFramerate( float delta ) {
 		SDL_Delay(5);
 }
 
-void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture ) {
+void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture, TTF_Font** font ) {
 	int i;
 	for( i = 0; i < texture->len; i++ ) {
-		SDL_DestroyTexture(texture->pointers[i]);
+		if((texture->pointers)[i]) SDL_DestroyTexture((texture->pointers)[i]);
 	}
-	free(texture->pointers);
+	if(texture->pointers) free(texture->pointers);
+
+	for( i = 0; i < ARRAY_NUM_FONT; i++) {
+		if(font[i]) TTF_CloseFont(font[i]);
+	}
+
 	if(renderer) SDL_DestroyRenderer(renderer);
 	if(window) SDL_DestroyWindow(window);
-	IMG_Quit();
 	TTF_Quit();
+	IMG_Quit();
 	SDL_Quit();
 }

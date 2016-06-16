@@ -20,13 +20,15 @@
 #define FRAMERATE 30
 
 #define WINDOW_TITLE  "The Gray Spaceship"
-#define WINDOW_SIZE_X 640
+#define WINDOW_SIZE_X 720
 #define WINDOW_SIZE_Y 480
 
-#define PATH_FONT   "fonts/Lato-Light.ttf"
+#define PATH_FONT   "fonts/Laksaman.ttf"
 #define PATH_NAVE   "sprites/nave/nave.png"
 #define PATH_METEOR "sprites/meteoro.png"
 #define PATH_LASER  "sprites/laser.png"
+
+#define ARRAY_NUM_FONT 2
 
 #define IMG_NAVE_H   200
 #define IMG_NAVE_W   200
@@ -70,6 +72,8 @@ SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path, struct texture
 SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, SDL_Color* color, struct texturePointers* textures);
 int initSDL(SDL_Window** window, SDL_Renderer** renderer);
 void ctrlFramerate( float delta );
-void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture );
+void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture, TTF_Font** font );
+
+void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clock_t* runtime );
 
 int addTexturePointer( struct texturePointers* texture, SDL_Texture* elem, int jumpSize );
