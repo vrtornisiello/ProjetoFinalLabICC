@@ -51,7 +51,7 @@ int main(char argc, char* argv[]) {
 
 	SDL_Event e;
 	int isRunning = 1;
-	int screen = 0; // menu principal, single e multi, jogo
+	int screen = 0; // menu principal, single e multi, jogo, save, return
 	while( isRunning ) {
 		runtime[0] = clock();
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
