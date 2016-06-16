@@ -21,9 +21,9 @@
 #define WINDOW_SIZE_Y 480
 
 #define PATH_FONT   "fonts/Lato-Light.ttf"
-#define PATH_NAVE   "img/nave/nave.png"
-#define PATH_METEOR "img/meteoro/meteoro.bmp"
-#define PATH_LASER  "img/laser/laser.bmp"
+#define PATH_NAVE   "sprites/nave/nave.png"
+#define PATH_METEOR "sprites/meteoro.png"
+#define PATH_LASER  "sprites/laser.png"
 
 #define IMG_NAVE_H   200
 #define IMG_NAVE_W   200
@@ -57,5 +57,15 @@ typedef struct _nave {
 	char nome[11]; // 10 letras
 } Nave;
 
+struct texturePointers {
+	SDL_Texture** pointers;
+	int size;
+	int len;
+};
+
+SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path, struct texturePointers* textures);
+SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, SDL_Color* color, struct texturePointers* textures);
 int initSDL(SDL_Window** window, SDL_Renderer** renderer);
-SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path);
+void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture );
+
+int addTexturePointer( struct texturePointers* texture, SDL_Texture* elem, int jumpSize );
