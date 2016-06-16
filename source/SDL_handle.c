@@ -77,6 +77,14 @@ int initSDL(SDL_Window** window, SDL_Renderer** renderer) {
 	return 0;
 }
 
+void ctrlFramerate( float delta ) {
+	printf("Delta: %.2f\n", delta);
+	if( delta + 5 < 1000/FRAMERATE )
+		SDL_Delay(1000/FRAMERATE - delta);
+	else
+		SDL_Delay(5);
+}
+
 void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture ) {
 	int i;
 	for( i = 0; i < texture->len; i++ ) {

@@ -15,6 +15,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
+#include <time.h>
+
+#define FRAMERATE 30
 
 #define WINDOW_TITLE  "The Gray Spaceship"
 #define WINDOW_SIZE_X 640
@@ -66,6 +69,7 @@ struct texturePointers {
 SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path, struct texturePointers* textures);
 SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, SDL_Color* color, struct texturePointers* textures);
 int initSDL(SDL_Window** window, SDL_Renderer** renderer);
+void ctrlFramerate( float delta );
 void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture );
 
 int addTexturePointer( struct texturePointers* texture, SDL_Texture* elem, int jumpSize );

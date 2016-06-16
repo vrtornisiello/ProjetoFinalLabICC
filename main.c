@@ -31,10 +31,14 @@ int main(char argc, char* argv[]) {
 		closeALL(window, renderer, &textures);
 		return -2;
 	}
-	
+
+	clock_t initTime = 0,
+			endTime = 0;
+
 	SDL_Event e;
 	int isRunning = 1;
 	while( isRunning ) {
+		initTime = clock();
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
 	    SDL_RenderClear( renderer ); // Limpa a tela
 
@@ -54,7 +58,8 @@ int main(char argc, char* argv[]) {
 			}
 		}
 
-		SDL_Delay(20);
+		endTime = clock();
+		ctrlFramerate((endTime - initTime)*1000/CLOCKS_PER_SEC);
 	}
 
 	closeALL(window, renderer, &textures);
