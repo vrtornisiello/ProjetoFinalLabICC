@@ -51,6 +51,7 @@ int main(char argc, char* argv[]) {
 
 	SDL_Event e;
 	int isRunning = 1;
+	int screen = 0; // menu principal, single e multi, jogo
 	while( isRunning ) {
 		runtime[0] = clock();
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
@@ -67,7 +68,10 @@ int main(char argc, char* argv[]) {
 			}
 		}
 
-		drawMenu( window, renderer, font, runtime );
+		if( screen == 0 ) drawMenu( window, renderer, font, runtime, &screen, &textures );
+		else if( screen == 1 ) drawInitUser( window, renderer, font, runtime, &screen, &textures );
+
+		SDL_RenderPresent(renderer);
 
 		runtime[1] = clock();
 		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);

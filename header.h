@@ -15,7 +15,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
-#include <time.h>
+#include<time.h>
+#include<string.h>
 
 #define FRAMERATE 30
 
@@ -37,6 +38,9 @@
 #define IMG_LASER_H  100
 #define IMG_LASER_W  20
 
+#define MAX_CHAR_NOME 11
+#define SIZE_INPUT    300
+
 typedef struct _point {
 	int x;
 	int y;
@@ -46,6 +50,11 @@ typedef struct _vector {
 	int x;
 	int y;
 } Vector;
+
+typedef struct _dimension {
+	int h;
+	int w;
+} Dimension;
 
 typedef struct _obj {
 	Point position;
@@ -59,7 +68,7 @@ typedef struct _nave {
 	Point position;
 	int ang;
 	int active;
-	char nome[11]; // 10 letras
+	char nome[MAX_CHAR_NOME]; // 10 letras
 } Nave;
 
 struct texturePointers {
@@ -74,6 +83,7 @@ int initSDL(SDL_Window** window, SDL_Renderer** renderer);
 void ctrlFramerate( float delta );
 void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointers* texture, TTF_Font** font );
 
-void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clock_t* runtime );
-
+void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clock_t* runtime, int* screen, struct texturePointers* textures );
+void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
+					clock_t* runtime, int* screen, struct texturePointers* textures );
 int addTexturePointer( struct texturePointers* texture, SDL_Texture* elem, int jumpSize );
