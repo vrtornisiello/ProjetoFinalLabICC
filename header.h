@@ -77,6 +77,13 @@ struct texturePointers {
 	int len;
 };
 
+	typedef struct _list{
+		void* list;
+		int len;
+		int size;
+		unsigned int elemSize;
+	} List;
+
 SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path, struct texturePointers* textures);
 SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, SDL_Color* color, struct texturePointers* textures);
 int initSDL(SDL_Window** window, SDL_Renderer** renderer);
@@ -86,4 +93,10 @@ void closeALL( SDL_Window* window, SDL_Renderer* renderer, struct texturePointer
 void drawMenu( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[], clock_t* runtime, int* screen, struct texturePointers* textures );
 void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
 					clock_t* runtime, int* screen, struct texturePointers* textures );
+void drawMultiplayer();
+void drawSave();
+void drawReturn();
+void drawGame();
+
+
 int addTexturePointer( struct texturePointers* texture, SDL_Texture* elem, int jumpSize );

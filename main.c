@@ -70,6 +70,10 @@ int main(char argc, char* argv[]) {
 
 		if( screen == 0 ) drawMenu( window, renderer, font, runtime, &screen, &textures );
 		else if( screen == 1 ) drawInitUser( window, renderer, font, runtime, &screen, &textures );
+		else if( screen == 2 ) drawMultiplayer();
+		else if( screen == 3 ) drawGame();
+		else if( screen == 4 ) drawSave();
+		else if( screen == 5 ) drawReturn();
 
 		SDL_RenderPresent(renderer);
 

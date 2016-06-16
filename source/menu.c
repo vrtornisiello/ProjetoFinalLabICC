@@ -285,3 +285,13 @@ void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, TTF_Font* font[],
 	if(txt[1]) SDL_DestroyTexture(txt[1]);
 	if(txt[2]) SDL_DestroyTexture(txt[2]);
 }
+
+void drawMultiplayer() {
+
+}
+void drawSave() {
+
+}
+void drawReturn() {
+
+}
