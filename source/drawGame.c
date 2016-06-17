@@ -103,10 +103,14 @@ void drawGame(SDL_Window* window, SDL_Renderer* renderer,
 				((SDL_Rect*)rect.list)[i].h = texture_dim[TEXTURE_LASER].h;
 				((SDL_Rect*)rect.list)[i].w = texture_dim[TEXTURE_LASER].w;
 		SDL_RenderCopy( renderer, texture[TEXTURE_LASER] , NULL, &(((SDL_Rect*)rect.list)[i]) );
+
 			}
+			if(!( ((Obj*)(objs->list))[e-users->len].position.x < WINDOW_SIZE_X + 100 
+				&& ((Obj*)(objs->list))[e-users->len].position.y < WINDOW_SIZE_Y + 100
+				&& ((Obj*)(objs->list))[e-users->len].position.x > -100 
+				&& ((Obj*)(objs->list))[e-users->len].position.y > -100) ) removeFromList(&rect, e-users->len);
 		}
-
-
+ 
 		SDL_RenderPresent(renderer);
 		SDL_RenderClear(renderer);
 		runtime[1] = clock();
