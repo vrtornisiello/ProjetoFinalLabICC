@@ -9,9 +9,11 @@ int main(char argc, char* argv[]) {
 	TTF_Font* font[ARRAY_NUM_FONT]          = {NULL};
 
 	initGraphics(&window, &renderer, texture, font);
-
 	List users, objs;
-	if( initList(&users, &objs) < 0 ) closeALL(window, renderer, texture, font);
+	if( initList(&users, &objs) < 0 ) {
+		closeALL(window, renderer, texture, font);
+		return -1;
+	}
 
 	clock_t runtime[2] = {0, 0};
 
@@ -99,14 +101,10 @@ int initList( List* users, List* objs ) {
 		return -1;
 	}
 
-	objs->len      = 1;
-	objs->size     = 1;
+	objs->len      = 0;
+	objs->size     = 0;
 	objs->elemSize = sizeof(Obj);
-	objs->list     = malloc(sizeof(Obj));
-	if(!(objs->list)) {
-		fprintf(stderr, "Erro ao alocar memória (objs).\n");
-		return -1;
-	}
+	objs->list     = NULL;
 
 	return 0;
 }

@@ -30,6 +30,7 @@ void drawGame(SDL_Window* window, SDL_Renderer* renderer,
 	Point mouse = {0};
 	int key[4] = {0};
 	i = 0;
+					Obj aux;
 	while( *screen == SCREEN_GAME ) {
 		runtime[1] = clock();
 		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
@@ -59,24 +60,55 @@ void drawGame(SDL_Window* window, SDL_Renderer* renderer,
 				case SDL_MOUSEMOTION:
 					SDL_GetMouseState(&(mouse.x), &(mouse.y));
 				break;
+
+				case SDL_MOUSEBUTTONDOWN:
+					aux.position.x = ((Nave*)(users->list))[i].position.x;
+					aux.position.y = ((Nave*)(users->list))[i].position.y;
+					aux.initPoint.x = aux.position.x;
+					aux.initPoint.y = aux.position.y;
+					aux.dirVector.x = sin(((Nave*)(users->list))[i].ang*M_PI/180) * MOVEMENT_INCREMENT;
+					aux.dirVector.y = -cos(((Nave*)(users->list))[i].ang*M_PI/180) * MOVEMENT_INCREMENT;
+					aux.r = 0;
+					aux.type = 1;
+					addToList(objs, &aux, OBJ_JUMPSIZE);
+
+					SDL_Rect rect_aux = {0};
+					addToList(&rect, &rect_aux, OBJ_JUMPSIZE);
+				break;
 			}
-
-			((Nave*)(users->list))[i].ang = -90 + (atan2(
-				(((Nave*)(users->list))[i].position.y + nave_center.y - mouse.y),
-				(((Nave*)(users->list))[i].position.x + nave_center.x - mouse.x)))*180/M_PI;
-
-			if( key[UP] ) ((Nave*)(users->list))[i].position.y -= MOVEMENT_INCREMENT;
-			if( key[DOWN] ) ((Nave*)(users->list))[i].position.y += MOVEMENT_INCREMENT;
-			if( key[LEFT] )	((Nave*)(users->list))[i].position.x -= MOVEMENT_INCREMENT;
-			if( key[RIGHT] ) ((Nave*)(users->list))[i].position.x += MOVEMENT_INCREMENT;
-
-			SDL_Rect dstrect = { ((Nave*)(users->list))[i].position.x,
-									((Nave*)(users->list))[i].position.y, texture_dim[TEXTURE_NAVE].w, texture_dim[TEXTURE_NAVE].h };
-
-			SDL_RenderClear(renderer);
-			SDL_RenderCopyEx( renderer, texture[0]	, NULL, &dstrect, ((Nave*)(users->list))[i].ang, &nave_center , SDL_FLIP_NONE );
-			SDL_RenderPresent(renderer);
 		}
+		((Nave*)(users->list))[i].ang = -90 + (atan2(
+			(((Nave*)(users->list))[i].position.y + nave_center.y - mouse.y),
+			(((Nave*)(users->list))[i].position.x + nave_center.x - mouse.x)))*180/M_PI;
+
+		if( key[UP] ) ((Nave*)(users->list))[i].position.y -= MOVEMENT_INCREMENT;
+		if( key[DOWN] ) ((Nave*)(users->list))[i].position.y += MOVEMENT_INCREMENT;
+		if( key[LEFT] )	((Nave*)(users->list))[i].position.x -= MOVEMENT_INCREMENT;
+		if( key[RIGHT] ) ((Nave*)(users->list))[i].position.x += MOVEMENT_INCREMENT;
+
+		SDL_Rect _rect = { ((Nave*)(users->list))[i].position.x,
+								((Nave*)(users->list))[i].position.y, texture_dim[TEXTURE_NAVE].w, texture_dim[TEXTURE_NAVE].h };
+
+		SDL_RenderCopyEx( renderer, texture[0]	, NULL, &(_rect), ((Nave*)(users->list))[i].ang, &nave_center , SDL_FLIP_NONE );
+
+		int e;
+		for( e = users->len; e < rect.len; e++ ) {
+			((Obj*)(objs->list))[e-users->len].r++;
+			((Obj*)(objs->list))[e-users->len].position.x = ((Obj*)(objs->list))[e-users->len].initPoint.x + ((Obj*)(objs->list))[e-users->len].dirVector.x * ((Obj*)(objs->list))[e-users->len].r;
+			((Obj*)(objs->list))[e-users->len].position.y = ((Obj*)(objs->list))[e-users->len].initPoint.y + ((Obj*)(objs->list))[e-users->len].dirVector.y * ((Obj*)(objs->list))[e-users->len].r;
+
+			((SDL_Rect*)rect.list)[i].x = ((Obj*)(objs->list))[e-users->len].position.x;
+			((SDL_Rect*)rect.list)[i].y = ((Obj*)(objs->list))[e-users->len].position.y;
+			if( ((Obj*)(objs->list))[e-users->len].type == 1 ) {
+				((SDL_Rect*)rect.list)[i].h = texture_dim[TEXTURE_LASER].h;
+				((SDL_Rect*)rect.list)[i].w = texture_dim[TEXTURE_LASER].w;
+		SDL_RenderCopy( renderer, texture[TEXTURE_LASER] , NULL, &(((SDL_Rect*)rect.list)[i]) );
+			}
+		}
+
+
+		SDL_RenderPresent(renderer);
+		SDL_RenderClear(renderer);
 		runtime[1] = clock();
 	}
 }

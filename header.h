@@ -18,6 +18,8 @@
 #include<time.h>
 #include<string.h>
 
+#define OBJ_JUMPSIZE 5
+
 #define FRAMERATE 30
 
 #define WINDOW_TITLE  "The Gray Spaceship"
