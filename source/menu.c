@@ -77,13 +77,13 @@ void drawMenu( SDL_Window* window, SDL_Renderer* renderer,
 		        case SDL_MOUSEBUTTONUP:
 					if( selectedButton == 0 ) {
 						printf("SinglePlayer\n");
-						*screen = 1;
+						*screen = SCREEN_SINGLE;
 					} else if( selectedButton == 1 ) {
 						printf("MultiPlayer\n");
-						*screen = 2;
+						*screen = SCREEN_MULTI;
 					} else if( selectedButton == 2 ) {
 						printf("Return\n");
-						*screen = 6;
+						*screen = SCREEN_OPEN;
 					} else if( selectedButton == 3 ) {
 						closeALL(window, renderer, texture, font);
 						exit(0);
@@ -123,7 +123,7 @@ void drawMenu( SDL_Window* window, SDL_Renderer* renderer,
 
 void drawInitUser( SDL_Window* window, SDL_Renderer* renderer,
 					SDL_Texture* texture[], TTF_Font* font[],
-						clock_t* runtime, int* screen ) {
+						List* users, clock_t* runtime, int* screen ) {
 	SDL_Color color = {255,255,255};
 	SDL_Texture* txt[3] = {NULL}; 
 	txt[0] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "User ID", &color);
@@ -186,7 +186,7 @@ void drawInitUser( SDL_Window* window, SDL_Renderer* renderer,
 	int inputLen = 0;
 	char input[MAX_CHAR_NOME] = {'\0'};
 	SDL_Event e;
-	while( *screen == 1 ) {
+	while( *screen == SCREEN_SINGLE ) {
 		runtime[1] = clock();
 		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
 
@@ -216,9 +216,12 @@ void drawInitUser( SDL_Window* window, SDL_Renderer* renderer,
 				case SDL_MOUSEBUTTONUP:
 					if(selectInput) SDL_StartTextInput();
 					else SDL_StopTextInput();
-					if(selectButton[0]) *screen = 0;
+					if(selectButton[0]) *screen = SCREEN_MENU;
 					else if(selectButton[1]) {
-						if(inputLen) *screen = 3;
+						if(inputLen) {
+							strncpy( ((Nave*)(users->list))[0].nome, input, inputLen );
+							*screen = SCREEN_GAME;
+						}
 						else {
 							strncpy(input, "Digite ID", MAX_CHAR_NOME);
 							inputLen = 10;

@@ -57,6 +57,13 @@
 #define SCREEN_SAVE   4
 #define SCREEN_OPEN   5
 
+#define UP    0
+#define DOWN  1
+#define LEFT  2
+#define RIGHT 3
+
+#define MOVEMENT_INCREMENT 5
+
 typedef struct _point {
 	int x;
 	int y;
@@ -109,7 +116,9 @@ void closeALL( SDL_Window* window, SDL_Renderer* renderer, SDL_Texture** texture
 
 void getMaxDim( Dimension* dim, int len, Dimension* dest );
 void drawMenu( SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture[], TTF_Font* font[], clock_t* runtime, int* screen );
-void drawInitUser( SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture[], TTF_Font* font[], clock_t* runtime, int* screen );
+void drawInitUser( SDL_Window* window, SDL_Renderer* renderer,
+					SDL_Texture* texture[], TTF_Font* font[],
+						List* users, clock_t* runtime, int* screen );
 void drawMultiplayer();
 void drawSave();
 void drawReturn();
@@ -117,7 +126,9 @@ void drawReturn();
 int addToList( List* list, void* elem, int jumpSize );
 int removeFromList( List* list, int elemId );
 
-void drawGame();
+void drawGame(SDL_Window* window, SDL_Renderer* renderer,
+				SDL_Texture* texture[], TTF_Font* font[],
+					List* users, List* objs, clock_t* runtime, int* screen);
 
 void initGraphics( SDL_Window** window, SDL_Renderer** renderer, SDL_Texture** texture, TTF_Font** font );
 int initList( List* users, List* objs );

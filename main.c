@@ -35,9 +35,9 @@ int main(char argc, char* argv[]) {
 		}
 
 		if( screen == SCREEN_MENU ) drawMenu( window, renderer, texture, font, runtime, &screen );
-		else if( screen == SCREEN_SINGLE ) drawInitUser( window, renderer, texture, font, runtime, &screen );
+		else if( screen == SCREEN_SINGLE ) drawInitUser( window, renderer, texture, font, &users, runtime, &screen );
 		else if( screen == SCREEN_MULTI ) drawMultiplayer();
-		else if( screen == SCREEN_GAME ) drawGame();
+		else if( screen == SCREEN_GAME ) drawGame( window, renderer, texture, font, &users, &objs, runtime, &screen );
 		else if( screen == SCREEN_SAVE ) drawSave();
 		else if( screen == SCREEN_OPEN ) drawReturn();
 
@@ -90,7 +90,7 @@ void initGraphics( SDL_Window** window, SDL_Renderer** renderer, SDL_Texture** t
 }
 
 int initList( List* users, List* objs ) {
-	users->len      = 0;
+	users->len      = 1;
 	users->size     = 1;
 	users->elemSize = sizeof(Nave);
 	users->list     = malloc(sizeof(Nave));
@@ -99,7 +99,7 @@ int initList( List* users, List* objs ) {
 		return -1;
 	}
 
-	objs->len      = 0;
+	objs->len      = 1;
 	objs->size     = 1;
 	objs->elemSize = sizeof(Obj);
 	objs->list     = malloc(sizeof(Obj));
