@@ -1,6 +1,6 @@
 #include"../header.h"
 
-void drawSave(  SDL_Window* window,
+void drawOpen(  SDL_Window* window,
 				SDL_Renderer* renderer,
 				List* texture,
 				TTF_Font* font[],
@@ -12,9 +12,9 @@ void drawSave(  SDL_Window* window,
 	SDL_Color color = {255,255,255,255};
 	SDL_Color red = {255,0,0,255};
 	SDL_Texture* txt[4] = {NULL};
-	txt[0] = LoadTxtTexture(renderer, font[FONT_INDEX_BIG], "Digite o caminho:", &color, texture);
+	txt[0] = LoadTxtTexture(renderer, font[FONT_INDEX_BIG], "Digite o caminho para o save:", &color, texture);
 	txt[1] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "Voltar", &color, texture);
-	txt[2] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "Salvar", &color, texture);
+	txt[2] = LoadTxtTexture(renderer, font[FONT_INDEX_MED], "Abrir", &color, texture);
 	txt[3] = LoadTxtTexture(renderer, font[FONT_INDEX_SML], "No Errors", &red, texture);
 
 	Dimension txt_dim[4] = {0};
@@ -84,8 +84,10 @@ void drawSave(  SDL_Window* window,
 
 	SDL_StopTextInput();
 
+	int openFlags = OPEN_NOFLAGS;
+
 	char message[MAX_MSG_INPUT] = "No Errors.";
-	while( *screen == SCREEN_SAVE ) {
+	while( *screen == SCREEN_OPEN ) {
 		runtime[1] = clock();
 		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
@@ -112,17 +114,22 @@ void drawSave(  SDL_Window* window,
 						*screen = SCREEN_MENU;
 					} else if( selectButton == 1 ) {
 						if( inputLen > 0 ) {
-							switch( saveUser(users, objs, input) ) {
-								case -1:
-									strncpy(message, "Erro ao salvar o arquivo. Usuario nao encontrado.", MAX_MSG_INPUT);
+							switch( openUser(users, objs, input, openFlags) ) {
+								case -1:			  
+									strncpy(message, "Usuario ativo. Clique em Abrir para sobrescrever.", MAX_MSG_INPUT);
+									openFlags = OPEN_OVERWRITE;
 									hasChangedInput = 1;
 								break;
 								case -2:
-									strncpy(message, "Erro ao salvar o arquivo. Verifique o caminho digitado.", MAX_MSG_INPUT);
+									strncpy(message, "Verifique o caminho digitado.", MAX_MSG_INPUT);
+									hasChangedInput = 1;
+								break;
+								case -3:
+									strncpy(message, "Houve um erro ao configurar o usuario.", MAX_MSG_INPUT);
 									hasChangedInput = 1;
 								break;
 								default:
-									*screen = SCREEN_MULTI;
+									*screen = SCREEN_GAME;
 								break;
 							}
 						}

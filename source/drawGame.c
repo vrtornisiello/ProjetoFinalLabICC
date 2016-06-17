@@ -1,25 +1,37 @@
 #include"../header.h"
 
-void drawGame(SDL_Window* window, SDL_Renderer* renderer,
-				SDL_Texture* texture[], TTF_Font* font[],
-					List* users, List* objs, clock_t* runtime, int* screen) {
+void drawGame ( SDL_Window* window,
+				SDL_Renderer* renderer,
+				List* textures,
+				TTF_Font* font[],
+				List* users,
+				List* objs,
+				clock_t* runtime,
+				int* screen ) {
 	List rect;
 	rect.len = users->len + objs->len;
 	rect.size = rect.len;
 	rect.elemSize = sizeof(SDL_Rect);
 	rect.list = malloc( rect.elemSize * rect.size );
 
-	Dimension texture_dim[ARRAY_NUM_TEXTURE] = {0};
+	SDL_Texture* texture[TEXTURE_MAIN_NUM] = {NULL};
+	Dimension texture_dim[TEXTURE_MAIN_NUM] = {0};
 	int i;
-	for( i = 0; i < ARRAY_NUM_TEXTURE; i++ ) {
+	for( i = 0; i < TEXTURE_MAIN_NUM; i++ ) {
+		getFromList(textures, i, &(texture[i]));
 		if(SDL_QueryTexture(texture[i], NULL, NULL, &(texture_dim[i].w), &(texture_dim[i].h)) < 0) {
 			fprintf(stderr, "%s\n", SDL_GetError());
 		}
 	}
 
 	for( i = 0; i < users->len; i++ ) {
-		((Nave*)(users->list))[i].position.x = 50 + rand()%(WINDOW_SIZE_X-100);
-		((Nave*)(users->list))[i].position.y = 50 + rand()%(WINDOW_SIZE_Y-100);
+		User user_aux;
+		getFromList(users, i, &user_aux);
+
+		user_aux.position.x = 50 + rand()%(WINDOW_SIZE_X-100);
+		user_aux.position.y = 50 + rand()%(WINDOW_SIZE_Y-100);
+
+		updateList(users, i, &user_aux);
 	}
 
     SDL_Event event;
@@ -30,16 +42,20 @@ void drawGame(SDL_Window* window, SDL_Renderer* renderer,
 	Point mouse = {0};
 	int key[4] = {0};
 	i = 0;
-					Obj aux;
+	Obj aux;
 	while( *screen == SCREEN_GAME ) {
 		runtime[1] = clock();
 		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
+
+		User user = {0};
+		getFromList(users, i, &user);
+
 		while(SDL_PollEvent(&event))
 		{
 			switch(event.type)
 			{
 				case SDL_QUIT:
-					closeALL(window, renderer, texture, font);
+					closeALL(window, renderer, textures, font);
 					exit(0);
 				break;
 
@@ -62,12 +78,12 @@ void drawGame(SDL_Window* window, SDL_Renderer* renderer,
 				break;
 
 				case SDL_MOUSEBUTTONDOWN:
-					aux.position.x = ((Nave*)(users->list))[i].position.x;
-					aux.position.y = ((Nave*)(users->list))[i].position.y;
+					aux.position.x = user.position.x;
+					aux.position.y = user.position.y;
 					aux.initPoint.x = aux.position.x;
 					aux.initPoint.y = aux.position.y;
-					aux.dirVector.x = sin(((Nave*)(users->list))[i].ang*M_PI/180) * MOVEMENT_INCREMENT;
-					aux.dirVector.y = -cos(((Nave*)(users->list))[i].ang*M_PI/180) * MOVEMENT_INCREMENT;
+					aux.dirVector.x = sin(user.ang*M_PI/180) * MOVEMENT_INCREMENT;
+					aux.dirVector.y = -cos(user.ang*M_PI/180) * MOVEMENT_INCREMENT;
 					aux.r = 0;
 					aux.type = 1;
 					addToList(objs, &aux, OBJ_JUMPSIZE);
@@ -77,40 +93,48 @@ void drawGame(SDL_Window* window, SDL_Renderer* renderer,
 				break;
 			}
 		}
-		((Nave*)(users->list))[i].ang = -90 + (atan2(
-			(((Nave*)(users->list))[i].position.y + nave_center.y - mouse.y),
-			(((Nave*)(users->list))[i].position.x + nave_center.x - mouse.x)))*180/M_PI;
 
-		if( key[UP] ) ((Nave*)(users->list))[i].position.y -= MOVEMENT_INCREMENT;
-		if( key[DOWN] ) ((Nave*)(users->list))[i].position.y += MOVEMENT_INCREMENT;
-		if( key[LEFT] )	((Nave*)(users->list))[i].position.x -= MOVEMENT_INCREMENT;
-		if( key[RIGHT] ) ((Nave*)(users->list))[i].position.x += MOVEMENT_INCREMENT;
+		user.ang = -90 + (atan2(user.position.y + nave_center.y - mouse.y,
+			user.position.x + nave_center.x - mouse.x))*180/M_PI;
 
-		SDL_Rect _rect = { ((Nave*)(users->list))[i].position.x,
-								((Nave*)(users->list))[i].position.y, texture_dim[TEXTURE_NAVE].w, texture_dim[TEXTURE_NAVE].h };
+		if( key[UP] ) user.position.y -= MOVEMENT_INCREMENT;
+		if( key[DOWN] ) user.position.y += MOVEMENT_INCREMENT;
+		if( key[LEFT] )	user.position.x -= MOVEMENT_INCREMENT;
+		if( key[RIGHT] ) user.position.x += MOVEMENT_INCREMENT;
 
-		SDL_RenderCopyEx( renderer, texture[0]	, NULL, &(_rect), ((Nave*)(users->list))[i].ang, &nave_center , SDL_FLIP_NONE );
+		SDL_Rect _rect = { user.position.x, user.position.y,
+			texture_dim[TEXTURE_NAVE].w, texture_dim[TEXTURE_NAVE].h };
+	
+		SDL_RenderCopyEx( renderer, texture[0], NULL, &(_rect), user.ang, &nave_center , SDL_FLIP_NONE );
+
+		updateList(users, i, &user);
 
 		int e;
 		for( e = users->len; e < rect.len; e++ ) {
-			((Obj*)(objs->list))[e-users->len].r++;
-			((Obj*)(objs->list))[e-users->len].position.x = ((Obj*)(objs->list))[e-users->len].initPoint.x + ((Obj*)(objs->list))[e-users->len].dirVector.x * ((Obj*)(objs->list))[e-users->len].r;
-			((Obj*)(objs->list))[e-users->len].position.y = ((Obj*)(objs->list))[e-users->len].initPoint.y + ((Obj*)(objs->list))[e-users->len].dirVector.y * ((Obj*)(objs->list))[e-users->len].r;
+			Obj obj_aux = {0};
+			getFromList(objs, e-users->len, &obj_aux);
+			obj_aux.r++;
+			obj_aux.position.x = obj_aux.initPoint.x + obj_aux.dirVector.x * obj_aux.r;
+			obj_aux.position.y = obj_aux.initPoint.y + obj_aux.dirVector.y * obj_aux.r;
 
-			((SDL_Rect*)rect.list)[i].x = ((Obj*)(objs->list))[e-users->len].position.x;
-			((SDL_Rect*)rect.list)[i].y = ((Obj*)(objs->list))[e-users->len].position.y;
-			if( ((Obj*)(objs->list))[e-users->len].type == 1 ) {
-				((SDL_Rect*)rect.list)[i].h = texture_dim[TEXTURE_LASER].h;
-				((SDL_Rect*)rect.list)[i].w = texture_dim[TEXTURE_LASER].w;
-		SDL_RenderCopy( renderer, texture[TEXTURE_LASER] , NULL, &(((SDL_Rect*)rect.list)[i]) );
-
+			SDL_Rect rect_aux;
+			getFromList( &rect, i, &rect_aux );
+			rect_aux.x = obj_aux.position.x;
+			rect_aux.y = obj_aux.position.y;
+			if( obj_aux.type == 1 ) {
+				rect_aux.h = texture_dim[TEXTURE_LASER].h;
+				rect_aux.w = texture_dim[TEXTURE_LASER].w;
+				SDL_RenderCopy( renderer, texture[TEXTURE_LASER] , NULL, &rect_aux );
 			}
-			if(!( ((Obj*)(objs->list))[e-users->len].position.x < WINDOW_SIZE_X + 100 
-				&& ((Obj*)(objs->list))[e-users->len].position.y < WINDOW_SIZE_Y + 100
-				&& ((Obj*)(objs->list))[e-users->len].position.x > -100 
-				&& ((Obj*)(objs->list))[e-users->len].position.y > -100) ) removeFromList(&rect, e-users->len);
+			if(!( obj_aux.position.x < WINDOW_SIZE_X + 100 
+				&& obj_aux.position.y < WINDOW_SIZE_Y + 100
+				&& obj_aux.position.x > -100 
+				&& obj_aux.position.y > -100) ) removeFromList(&rect, e-users->len);
+			else updateList(&rect, e-users->len, &rect_aux);
+
+			updateList(objs, e-users->len, &obj_aux);
 		}
- 
+
 		SDL_RenderPresent(renderer);
 		SDL_RenderClear(renderer);
 		runtime[1] = clock();

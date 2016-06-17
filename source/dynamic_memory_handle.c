@@ -26,10 +26,30 @@ int addToList( List* list, void* elem, int jumpSize ) {
 int removeFromList( List* list, int elemId ) {
 	if( list->len > elemId ) {
 		list->len--;
-		memcpy((list->list + (elemId)*(list->elemSize)), (list->list + (list->len)*(list->elemSize)), list->elemSize);
+		if( list->len != elemId )
+			memcpy((list->list + (elemId)*(list->elemSize)), (list->list + (list->len)*(list->elemSize)), list->elemSize);
+
 		memset((list->list + (list->len)*(list->elemSize)), 0, list->elemSize);
 		return 0;
 	}
 	fprintf(stderr, "ERRO: removeFromList(), invalid argument elemId (%d).\n", elemId);
+	return -1;
+}
+
+int getFromList( List* list, int elemId, void* dest ) {
+	if( list->len > elemId ) {
+		memcpy(dest, (list->list + (elemId)*(list->elemSize)), list->elemSize);
+		return 0;
+	}
+	fprintf(stderr, "ERRO: getFromList(), invalid argument elemId (%d).\n", elemId);
+	return -1;
+}
+
+int updateList( List* list, int elemId, void* update ) {
+	if( list->len > elemId ) {
+		memcpy((list->list + (elemId)*(list->elemSize)), update, list->elemSize);
+		return 0;
+	}
+	fprintf(stderr, "ERRO: updateList(), invalid argument elemId (%d).\n", elemId);
 	return -1;
 }

@@ -46,7 +46,7 @@ int initSDL(SDL_Window** window, SDL_Renderer** renderer) {
 	return 0;
 }
 // ----------------------- Texture ------------------------------
-SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path) {
+SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path, List* texture) {
 	SDL_Surface* imgSurface = IMG_Load(path);
 	if( !imgSurface ) {
 		fprintf(stderr, "Nao foi possivel carregar a imagem %s: %s\n", path, IMG_GetError());
@@ -55,27 +55,53 @@ SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path) {
 
 	SDL_Texture* img = SDL_CreateTextureFromSurface(renderer, imgSurface);
 	SDL_FreeSurface(imgSurface);
-	if( !img ) {
+	if( img ) {
+		if( addToList(texture, &img, 3) < 0 )
+			fprintf(stderr, "Falha ao adicionar textura a lista.\n");
+	} else
 		fprintf(stderr, "Erro ao criar textura (img): %s\n", IMG_GetError());
-	}
 
 	return img;
 }
 
-SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, SDL_Color* color) {
+SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, SDL_Color* color, List* texture) {
 	SDL_Surface* auxSurface  = TTF_RenderText_Blended(font, txt, *color);
 	if( !auxSurface ) {
 		fprintf(stderr, "Nao foi possivel renderizar o texto: %s\n", TTF_GetError());
 		return NULL;
 	}
+
 	SDL_Texture* txt_texture = SDL_CreateTextureFromSurface( renderer, auxSurface );
 	SDL_FreeSurface(auxSurface);
-	if( !txt_texture ) {
+	if( txt_texture ) {
+		if( addToList(texture, &txt_texture, 3) < 0 )
+			fprintf(stderr, "Falha ao adicionar textura a lista.\n");
+	} else
 		fprintf(stderr, "Erro ao criar textura (font): %s\n", SDL_GetError());
-	}
 
 	return txt_texture;
 }
+
+void destroyNonMainTexture( List* texture ) {
+	int i;
+	for( i = texture->len - 1; i >= TEXTURE_MAIN_NUM; i-- ) {
+		destroyLastTexture( texture );
+//		SDL_Texture* aux = NULL;
+//		getFromList(texture, i, &aux);
+//		if(aux) SDL_DestroyTexture(aux);
+//		removeFromList(texture, i);
+	}
+}
+
+void destroyLastTexture( List* texture ) {
+	SDL_Texture* aux = NULL;
+	if(texture->len) {
+		getFromList(texture, texture->len - 1, &aux);
+		if(aux) SDL_DestroyTexture(aux);
+		removeFromList(texture, texture->len - 1);
+	}
+}
+
 // ---------------------- Other -----------------------------------
 void ctrlFramerate( float delta ) {
 //	printf("Delta: %.2f\n", delta);
@@ -85,10 +111,12 @@ void ctrlFramerate( float delta ) {
 		SDL_Delay(5);
 }
 
-void closeALL( SDL_Window* window, SDL_Renderer* renderer, SDL_Texture** texture, TTF_Font** font ) {
+void closeALL( SDL_Window* window, SDL_Renderer* renderer, List* texture, TTF_Font** font ) {
 	int i;
-	for( i = 0; i < ARRAY_NUM_TEXTURE; i++ ) {
-		if(texture[i]) SDL_DestroyTexture(texture[i]);
+	for( i = 0; i < texture->len; i++ ) {
+		SDL_Texture* aux = NULL;
+		getFromList(texture, i, &aux);
+		if(aux) SDL_DestroyTexture(aux);
 	}
 
 	for( i = 0; i < ARRAY_NUM_FONT; i++) {
