@@ -97,14 +97,14 @@ void drawInitUser(  SDL_Window* window,
 						*screen = SCREEN_MENU;
 					} else if( selectButton == 1 ) {
 						if( inputLen > 0 ) {
-//							User user;
-//							strncpy(user.nome, input, MAX_CHAR_NOME);
-//							if( addToList(users, &user, 1) < 0 ) {
-//								strncpy(message, "Erro ao criar o usuario.", MAX_MSG_INPUT);
-//								hasChangedInput = 1;
-///							} else {
-//								*screen = SCREEN_GAME;
-//							}
+							User user;
+							strncpy(user.nome, input, MAX_CHAR_NOME);
+							if( addToList(users, &user, 1) < 0 ) {
+								strncpy(message, "Erro ao criar o usuario.", MAX_MSG_INPUT);
+								hasChangedInput = 1;
+							} else {
+								*screen = SCREEN_GAME;
+							}
 						}
 					}
 				break;
@@ -112,11 +112,12 @@ void drawInitUser(  SDL_Window* window,
 					if( e.key.keysym.sym == SDLK_BACKSPACE && inputLen > 0 ) {
 						input[--inputLen] = '\0';
 						hasChangedInput = 1;
+						strncpy(message, "No Errors.", MAX_MSG_INPUT);
 					}
 				break;
 				case SDL_TEXTINPUT:
 					if(inputLen < MAX_CHAR_INPUT) {
-						strncpy(input + inputLen, e.text.text, MAX_CHAR_INPUT-inputLen);
+						strncpy(input + inputLen, e.text.text, MAX_CHAR_NOME-inputLen-1);
 						inputLen = strlen(input);
 						strncpy(message, "No Errors.", MAX_MSG_INPUT);
 					} else {

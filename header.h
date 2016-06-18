@@ -23,8 +23,8 @@
 #define FRAMERATE 30
 
 #define WINDOW_TITLE  "The Gray Spaceship"
-#define WINDOW_SIZE_X 720
-#define WINDOW_SIZE_Y 480
+#define WINDOW_SIZE_X 1024
+#define WINDOW_SIZE_Y 576
 
 #define PATH_FONT   "fonts/Laksaman.ttf"
 #define PATH_NAVE   "sprites/nave/nave.png"

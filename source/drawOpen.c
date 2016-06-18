@@ -116,7 +116,7 @@ void drawOpen(  SDL_Window* window,
 						if( inputLen > 0 ) {
 							switch( openUser(users, objs, input, openFlags) ) {
 								case -1:			  
-									strncpy(message, "Usuario ativo. Clique em Abrir para sobrescrever.", MAX_MSG_INPUT);
+									strncpy(message, "Clique em Abrir para sobrescrever.", MAX_MSG_INPUT);
 									openFlags = OPEN_OVERWRITE;
 									hasChangedInput = 1;
 								break;
@@ -139,6 +139,7 @@ void drawOpen(  SDL_Window* window,
 					if( e.key.keysym.sym == SDLK_BACKSPACE && inputLen > 0 ) {
 						input[--inputLen] = '\0';
 						hasChangedInput = 1;
+						strncpy(message, "No Errors.", MAX_MSG_INPUT);
 					} else if( e.key.keysym.sym == SDLK_LEFT ) {
 						if( typing ) {
 							if(input_cut.x > 0) input_cut.x -= 5;

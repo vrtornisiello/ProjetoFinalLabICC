@@ -13,6 +13,7 @@ int addToList( List* list, void* elem, int jumpSize ) {
 				list->list = aux;
 				return addToList(list, elem, jumpSize);
 			} else {
+				list->size -= jumpSize;
 				fprintf(stderr, "ERRO: addToList, realocation of memory failed.\n");
 				return -2;
 			}
