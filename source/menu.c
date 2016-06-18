@@ -96,7 +96,7 @@ void drawMenu(  SDL_Window* window,
 					} else if( selectedButton == 4 ) {
 						printf("Continue\n");
 						if(users->len > 0)
-							*screen = SCREEN_SAVE;
+							*screen = SCREEN_GAME;
 					} else if( selectedButton == 5 ) {
 						closeALL(window, renderer, texture, font);
 						exit(0);
@@ -106,33 +106,18 @@ void drawMenu(  SDL_Window* window,
 		}
 
 		SDL_RenderCopy(renderer, txt[0], NULL, &(rect[0]));
-		if( users->len > 0 ) {
-			if( insidePoint(mouse, &(background_rect[3])) ) {
-				selectedButton = 3;
-				SDL_SetRenderDrawColor(renderer, 200,0,0,255);
-			} else {
-				SDL_SetRenderDrawColor(renderer, 50,50,50,255);
-			}
-			SDL_RenderCopy(renderer, txt[4], NULL, &(rect[4]));
-
-			if( insidePoint(mouse, &(background_rect[4])) ) {
-				selectedButton = 4;
-				SDL_SetRenderDrawColor(renderer, 200,0,0,255);
-			} else {
-				SDL_SetRenderDrawColor(renderer, 50,50,50,255);
-			}
-			SDL_RenderCopy(renderer, txt[5], NULL, &(rect[5]));
-		} else {
+		if( users->len <= 0 ) {
 			SDL_SetRenderDrawColor(renderer, 30,30,30,255);
+			SDL_RenderFillRect(renderer, &(background_rect[4]));
 		}
-		SDL_RenderFillRect(renderer, &(background_rect[3]));
-		SDL_RenderFillRect(renderer, &(background_rect[4]));
 		SDL_RenderCopy(renderer, txt[4], NULL, &(rect[4]));
 		SDL_RenderCopy(renderer, txt[5], NULL, &(rect[5]));
 
 		selectedButton = -1;
 		for( i = 1; i < 7; i++ ) { // botões
-			if( (i == 4) || (i == 5) ) continue;
+			if( (i == 4) || (i == 5) ) {
+				if( users->len <= 0 )  continue;
+			}
 			if( insidePoint(mouse, &(background_rect[i-1])) ) {
 				selectedButton = i-1;
 				SDL_SetRenderDrawColor(renderer, 200,0,0,255);

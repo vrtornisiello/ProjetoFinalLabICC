@@ -71,6 +71,7 @@ void drawGame ( SDL_Window* window,
 					if(event.key.keysym.sym == SDLK_DOWN) key[DOWN] = 0;
 					if(event.key.keysym.sym == SDLK_LEFT) key[LEFT] = 0;
 					if(event.key.keysym.sym == SDLK_RIGHT) key[RIGHT] = 0;
+					if(event.key.keysym.sym == SDLK_s) *screen = SCREEN_MENU;
 				break;
 
 				case SDL_MOUSEMOTION:

@@ -154,7 +154,7 @@ void drawOpen(  SDL_Window* window,
 				break;
 				case SDL_TEXTINPUT:
 					if(inputLen < MAX_CHAR_INPUT) {
-						strncpy(input + inputLen, e.text.text, MAX_CHAR_INPUT-inputLen);
+						strncpy(input + inputLen, e.text.text, MAX_CHAR_INPUT-inputLen-1);
 						inputLen = strlen(input);
 						strncpy(message, "No Errors.", MAX_MSG_INPUT);
 					} else {

@@ -12,15 +12,15 @@ int saveUser( List* users, List* objs, char* path ) {
 		return -2;
 	}
 
-	if( fwrite(&user, sizeof(user), 1, fd) != sizeof(user) ) {
-		fprintf(stderr, "Houve algum problema ao escrever o arquivo.\n");
+	if( fwrite(&user, sizeof(user), 1, fd) != 1 ) {
+		fprintf(stderr, "Houve algum problema ao escrever o arquivo (user).\n");
 		fclose(fd);
 		return 1;
 	}
 
 	int i;
 	if( fwrite( objs->list, objs->elemSize, objs->len, fd ) != objs->len )
-		fprintf(stderr, "Houve algum problema ao escrever o arquivo.\n");
+		fprintf(stderr, "Houve algum problema ao escrever o arquivo (obj).\n");
 
 	fclose(fd);
 	return 0;
@@ -48,7 +48,7 @@ int openUser( List* users, List* objs, char* path, int flags ) {
 		}
 
 		User user = {0};
-		if( fread(&user, sizeof(user), 1, fd) != sizeof(user) ) {
+		if( fread(&user, sizeof(user), 1, fd) != 1 ) {
 			fprintf(stderr, "Houve algum problema ao ler o arquivo.\n");
 			fclose(fd);
 			return -2;
@@ -59,7 +59,7 @@ int openUser( List* users, List* objs, char* path, int flags ) {
 		}
 
 		Obj obj;
-		while( fread( &obj, sizeof(obj), 1, fd ) != sizeof(obj) ) {
+		while( fread( &obj, sizeof(obj), 1, fd ) == 1 ) {
 			addToList(objs, &obj, OBJ_JUMPSIZE);
 		}
 		fclose(fd);
