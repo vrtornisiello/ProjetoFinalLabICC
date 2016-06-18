@@ -85,9 +85,11 @@ void drawSave(  SDL_Window* window,
 	SDL_StopTextInput();
 
 	char message[MAX_MSG_INPUT] = "No Errors.";
+
+	runtime[1] = clock();
+	ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC); // delay para considerar a mudança de página
 	while( *screen == SCREEN_SAVE ) {
-		runtime[1] = clock();
-		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
+		runtime[0] = clock();
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
 	    SDL_RenderClear( renderer ); // Limpa a tela
 
@@ -214,7 +216,8 @@ void drawSave(  SDL_Window* window,
 
 		SDL_RenderPresent(renderer);
 
-		runtime[0] = clock();
+		runtime[1] = clock();
+		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
 	}
 	destroyNonMainTexture(texture);
 }

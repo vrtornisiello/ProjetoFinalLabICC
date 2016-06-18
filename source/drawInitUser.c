@@ -72,9 +72,12 @@ void drawInitUser(  SDL_Window* window,
 	SDL_StopTextInput();
 
 	char message[MAX_MSG_INPUT] = "No Errors.";
+
+	runtime[1] = clock();
+	ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC); // delay para considerar a mudança de página
 	while( *screen == SCREEN_SINGLE ) {
-		runtime[1] = clock();
-		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
+		runtime[0] = clock();
+
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
 	    SDL_RenderClear( renderer ); // Limpa a tela
 
@@ -103,6 +106,7 @@ void drawInitUser(  SDL_Window* window,
 								strncpy(message, "Erro ao criar o usuario.", MAX_MSG_INPUT);
 								hasChangedInput = 1;
 							} else {
+								printf("dshsdhsksjhjskhdsajk\n");
 								*screen = SCREEN_GAME;
 							}
 						}
@@ -171,7 +175,8 @@ void drawInitUser(  SDL_Window* window,
 
 		SDL_RenderPresent(renderer);
 
-		runtime[0] = clock();
+		runtime[1] = clock();
+		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
 	}
 	destroyNonMainTexture(texture);
 }

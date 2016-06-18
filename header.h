@@ -25,6 +25,7 @@
 #define WINDOW_TITLE  "The Gray Spaceship"
 #define WINDOW_SIZE_X 1024
 #define WINDOW_SIZE_Y 576
+#define WINDOW_BORDER 40
 
 #define PATH_FONT   "fonts/Laksaman.ttf"
 #define PATH_NAVE   "sprites/nave/nave.png"
@@ -39,12 +40,12 @@
 #define FONT_INDEX_MED  1
 #define FONT_INDEX_SML  2
 
-#define IMG_NAVE_H   200
-#define IMG_NAVE_W   200
-#define IMG_METEOR_H 50
-#define IMG_METEOR_W 50
-#define IMG_LASER_H  100
-#define IMG_LASER_W  20
+#define IMG_NAVE_H   64
+#define IMG_NAVE_W   64
+#define IMG_METEOR_H 32
+#define IMG_METEOR_W 32
+#define IMG_LASER_H  30
+#define IMG_LASER_W  4
 
 #define MAX_CHAR_NOME  11
 #define MAX_CHAR_INPUT 200
@@ -63,15 +64,32 @@
 #define SCREEN_SAVE   4
 #define SCREEN_OPEN   5
 
+#define OBJ_TYPE_METEOR 0
+#define OBJ_TYPE_LASER  1
+
 #define UP    0
 #define DOWN  1
 #define LEFT  2
 #define RIGHT 3
 
-#define MOVEMENT_INCREMENT 5
+
+
+#define MOVEMENT_INCREMENT_METEOR  30
+#define MOVEMENT_INCREMENT_LASER  40
+#define MOVEMENT_INCREMENT_USER  20
+#define SHOOT_INTERVAL 1000
+#define CREATE_METEOR_INTERVAL 300
+
+
 
 #define OPEN_NOFLAGS   0
 #define OPEN_OVERWRITE 1
+
+#define ERROR_SDL_INIT    -1
+#define ERROR_SDL_TEXTURE -2
+#define ERROR_INIT_LIST   -3
+
+#define GAME_TYPE_SINGLE 0
 
 typedef struct _point {
 	int x;
@@ -79,8 +97,8 @@ typedef struct _point {
 } Point;
 
 typedef struct _vector {
-	int x;
-	int y;
+	float x;
+	float y;
 } Vector;
 
 typedef struct _dimension {
@@ -92,13 +110,14 @@ typedef struct _obj {
 	Point position;
 	Point initPoint;
 	Vector dirVector;
-	int r; // parâmetro veja GA
+	float ang;
+	float r; // parâmetro veja GA
 	int type; // meteoro ou tiro
 } Obj;
 
 typedef struct _nave {
 	Point position;
-	int ang;
+	float ang;
 	int active;
 	char nome[MAX_CHAR_NOME]; // 10 letras
 } User;
@@ -169,6 +188,7 @@ void drawGame(  SDL_Window* window,
 				int* screen );
 
 int insidePoint( Point p, SDL_Rect* rect );
+int insidePoint2( Point p, int x, int y, int w, int h );
 
 int saveUser( List* users, List* objs, char* path );
 int openUser( List* users, List* objs, char* path, int flags );

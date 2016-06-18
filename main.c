@@ -9,8 +9,8 @@ int main(char argc, char* argv[]) {
 	TTF_Font* font[ARRAY_NUM_FONT]          = {NULL};
 
 	initGraphics(&window, &renderer, &texture, font);
-	List users, objs;
-	initList(&users, &objs);
+	List users, meteors, lasers;
+	initList(&users, &meteors, &lasers);
 
 	clock_t runtime[2] = {0, 0}; // início e fim de uma frame
 
@@ -33,9 +33,9 @@ int main(char argc, char* argv[]) {
 		if( screen == SCREEN_MENU ) drawMenu( window, renderer, &texture, font, &users, runtime, &screen );
 		else if( screen == SCREEN_SINGLE ) drawInitUser( window, renderer, &texture, font, &users, runtime, &screen );
 		else if( screen == SCREEN_MULTI ) drawMultiplayer();
-		else if( screen == SCREEN_GAME ) drawGame( window, renderer, &texture, font, &users, &objs, runtime, &screen );
-		else if( screen == SCREEN_SAVE ) drawSave( window, renderer, &texture, font, &users, &objs, runtime, &screen );
-		else if( screen == SCREEN_OPEN ) drawOpen( window, renderer, &texture, font, &users, &objs, runtime, &screen );
+		else if( screen == SCREEN_GAME ) drawGame( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
+		else if( screen == SCREEN_SAVE ) drawSave( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
+		else if( screen == SCREEN_OPEN ) drawOpen( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
 
 		SDL_RenderPresent(renderer);
 
@@ -92,14 +92,19 @@ void initGraphics( SDL_Window** window, SDL_Renderer** renderer, List* texture, 
 	}
 }
 
-void initList( List* users, List* objs ) {
+void initList( List* users, List* meteors, List* lasers ) {
 	users->len      = 0;
 	users->size     = 0;
 	users->elemSize = sizeof(User);
 	users->list     = NULL;
 
-	objs->len      = 0;
-	objs->size     = 0;
-	objs->elemSize = sizeof(Obj);
-	objs->list     = NULL;
+	meteors->len      = 0;
+	meteors->size     = 0;
+	meteors->elemSize = sizeof(Obj);
+	meteors->list     = NULL;
+
+	lasers->len      = 0;
+	lasers->size     = 0;
+	lasers->elemSize = sizeof(Obj);
+	lasers->list     = NULL;
 }
