@@ -1,12 +1,14 @@
 #include"../header.h"
 
 void drawInitUser(  SDL_Window* window,
-				SDL_Renderer* renderer,
-				List* texture,
-				TTF_Font* font[],
-				List* users,
-				clock_t* runtime,
-				int* screen ) {
+					SDL_Renderer* renderer,
+					List* texture,
+					TTF_Font* font[],
+					List* users,
+					List* meteors,
+					List* lasers,
+					clock_t* runtime,
+					int* screen ) {
 
 	SDL_Color color = {255,255,255,255};
 	SDL_Color red = {255,0,0,255};
@@ -73,10 +75,10 @@ void drawInitUser(  SDL_Window* window,
 
 	char message[MAX_MSG_INPUT] = "No Errors.";
 
-	runtime[1] = clock();
-	ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC); // delay para considerar a mudança de página
+	runtime[1] = SDL_GetTicks();
+	ctrlFramerate( runtime[1] - runtime[0] ); // delay para considerar a mudança de página
 	while( *screen == SCREEN_SINGLE ) {
-		runtime[0] = clock();
+		runtime[0] = SDL_GetTicks();
 
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
 	    SDL_RenderClear( renderer ); // Limpa a tela
@@ -84,7 +86,7 @@ void drawInitUser(  SDL_Window* window,
 		while(SDL_PollEvent(&e)) {
 			switch(e.type) {
 				case SDL_QUIT:
-					closeALL(window, renderer, texture, font);
+					closeALL(window, renderer, texture, font, users, meteors, lasers);
 					exit(0);
 				break;
 			    case SDL_MOUSEMOTION:
@@ -97,16 +99,28 @@ void drawInitUser(  SDL_Window* window,
 						SDL_StopTextInput();
 
 					if( selectButton == 0 ) {
+						SDL_StopTextInput();
 						*screen = SCREEN_MENU;
 					} else if( selectButton == 1 ) {
 						if( inputLen > 0 ) {
+							for( i = users->len - 1; i >= 0; i-- ) {
+								removeFromList( users, i );
+							}
+							for( i = meteors->len - 1; i >= 0; i-- ) {
+								removeFromList( meteors, i );
+							}
+							for( i = lasers->len - 1; i >= 0; i-- ) {
+								removeFromList( lasers, i );
+							}
 							User user;
 							strncpy(user.nome, input, MAX_CHAR_NOME);
+							user.score = 0;
+							user.active = 0;
 							if( addToList(users, &user, 1) < 0 ) {
 								strncpy(message, "Erro ao criar o usuario.", MAX_MSG_INPUT);
 								hasChangedInput = 1;
 							} else {
-								printf("dshsdhsksjhjskhdsajk\n");
+								SDL_StopTextInput();
 								*screen = SCREEN_GAME;
 							}
 						}
@@ -120,7 +134,7 @@ void drawInitUser(  SDL_Window* window,
 					}
 				break;
 				case SDL_TEXTINPUT:
-					if(inputLen < MAX_CHAR_INPUT) {
+					if(inputLen < MAX_CHAR_INPUT-1) {
 						strncpy(input + inputLen, e.text.text, MAX_CHAR_NOME-inputLen-1);
 						inputLen = strlen(input);
 						strncpy(message, "No Errors.", MAX_MSG_INPUT);
@@ -175,8 +189,8 @@ void drawInitUser(  SDL_Window* window,
 
 		SDL_RenderPresent(renderer);
 
-		runtime[1] = clock();
-		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
+		runtime[1] = SDL_GetTicks();
+		ctrlFramerate( runtime[1] - runtime[0] );
 	}
 	destroyNonMainTexture(texture);
 }

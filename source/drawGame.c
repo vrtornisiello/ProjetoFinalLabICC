@@ -34,7 +34,7 @@ void createMeteor( Obj* obj, Point user ) {
 
 }
 
-void drawGame ( SDL_Window* window,
+void drawGame(  SDL_Window* window,
 				SDL_Renderer* renderer,
 				List* texture,
 				TTF_Font* font[],
@@ -43,17 +43,46 @@ void drawGame ( SDL_Window* window,
 				List* lasers,
 				clock_t* runtime,
 				int* screen ) {
-	List rect_list;
-	rect_list.len = users->len + meteors->len + lasers->len;
-	rect_list.size = rect_list.len;
-	rect_list.elemSize = sizeof(SDL_Rect);
-	rect_list.list = malloc(rect_list.elemSize * rect_list.size);
-	if( !rect_list.list ) {
+
+	List rectlist_user;
+	rectlist_user.len      = users->len;
+	rectlist_user.size     = users->len;
+	rectlist_user.elemSize = sizeof(SDL_Rect);
+	rectlist_user.list     = malloc(rectlist_user.elemSize * rectlist_user.size);
+	if( !(rectlist_user.list) ) {
+		closeALL(window, renderer, texture, font, users, meteors, lasers);
 		fprintf(stderr, "Erro ao inicializar lista (rect).\n");
 		exit(ERROR_INIT_LIST);
 	}
 
-	SDL_Rect* rect = (SDL_Rect*)rect_list.list;
+	List rectlist_meteor;
+	rectlist_meteor.len      = meteors->len;
+	rectlist_meteor.size     = meteors->len;
+	rectlist_meteor.elemSize = sizeof(SDL_Rect);
+	rectlist_meteor.list     = malloc(rectlist_meteor.elemSize * rectlist_meteor.size);
+	if( !(rectlist_meteor.list) ) {
+		free(rectlist_user.list);
+		closeALL(window, renderer, texture, font, users, meteors, lasers);
+		fprintf(stderr, "Erro ao inicializar lista (rect).\n");
+		exit(ERROR_INIT_LIST);
+	}
+
+	List rectlist_laser;
+	rectlist_laser.len      = lasers->len;
+	rectlist_laser.size     = lasers->len;
+	rectlist_laser.elemSize = sizeof(SDL_Rect);
+	rectlist_laser.list     = malloc(rectlist_laser.elemSize * rectlist_laser.size);
+	if( !(rectlist_laser.list) ) {
+		free(rectlist_user.list);
+		free(rectlist_meteor.list);
+		closeALL(window, renderer, texture, font, users, meteors, lasers);
+		fprintf(stderr, "Erro ao inicializar lista (rect).\n");
+		exit(ERROR_INIT_LIST);
+	}
+
+	SDL_Rect* rect_user   = (SDL_Rect*)rectlist_user.list;
+	SDL_Rect* rect_meteor = (SDL_Rect*)rectlist_meteor.list;
+	SDL_Rect* rect_laser  = (SDL_Rect*)rectlist_laser.list;
 
 	SDL_Texture* main_texture[TEXTURE_MAIN_NUM] = {NULL};
 	int i;
@@ -61,15 +90,18 @@ void drawGame ( SDL_Window* window,
 		getFromList(texture, i, &(main_texture[i]));
 	}
 
-	User user = {0};
-	Obj obj = {0};
+	User user = {0}; // aux
+	Obj obj   = {0}; // aux
 	for( i = 0; i < users->len; i++ ) {
 		getFromList(users, i, &user);
 
-		user.position.x = IMG_NAVE_W/2 + rand()%(WINDOW_SIZE_X - IMG_NAVE_W);
-		user.position.y = IMG_NAVE_H/2 + rand()%(WINDOW_SIZE_Y - IMG_NAVE_H);
+		if( !user.active ) {
+			user.position.x = IMG_NAVE_W/2 + rand()%(WINDOW_SIZE_X - IMG_NAVE_W);
+			user.position.y = IMG_NAVE_H/2 + rand()%(WINDOW_SIZE_Y - IMG_NAVE_H);
+			user.active = 1;
 
-		updateList(users, i, &user);
+			updateList(users, i, &user);
+		}
 	}
 
     SDL_Event event;
@@ -85,7 +117,7 @@ void drawGame ( SDL_Window* window,
 	};
 
 	Point mouse = {0};
-	int key[4] = {0};
+	int key[4] = {0}; // left right ....
 
 	int user_id = 0; //---------------------------------------
 	int game_type = GAME_TYPE_SINGLE;// ----------------------
@@ -94,8 +126,30 @@ void drawGame ( SDL_Window* window,
 	shoot_time[0] = 0;
 	meteor_time[0] = 0;
 
-	runtime[1] = clock();
-	ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
+	int scoreHasChanged = 0;
+
+	getFromList(users, user_id, &user);
+
+	SDL_Color color = {255,255,255,255};
+	SDL_Texture* nome = LoadTxtTexture(renderer, font[FONT_INDEX_SML], user.nome, &color, texture);
+
+	char char_score[MAX_DIGITS_SCORE];
+	snprintf(char_score, MAX_DIGITS_SCORE, "%d", user.score);
+	SDL_Texture* score = LoadTxtTexture(renderer, font[FONT_INDEX_MED], char_score, &color, texture);
+
+	SDL_Rect rect_nome, rect_score;
+	if(SDL_QueryTexture(nome, NULL, NULL, &(rect_nome.w), &(rect_nome.h)) < 0) {
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
+
+	if(SDL_QueryTexture(score, NULL, NULL, &(rect_score.w), &(rect_score.h)) < 0) {
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
+	rect_score.x = 20;
+	rect_score.y = 20;
+
+	runtime[1] = SDL_GetTicks();
+	ctrlFramerate(runtime[1] - runtime[0]);
 
 	while( *screen == SCREEN_GAME ) {
 		runtime[0] = SDL_GetTicks();
@@ -107,7 +161,10 @@ void drawGame ( SDL_Window* window,
 		while(SDL_PollEvent(&event)) {
 			switch(event.type) {
 				case SDL_QUIT:
-					closeALL(window, renderer, texture, font);
+					free(rectlist_user.list);
+					free(rectlist_meteor.list);
+					free(rectlist_laser.list);
+					closeALL(window, renderer, texture, font, users, meteors, lasers);
 					exit(0);
 				break;
 				case SDL_KEYDOWN:
@@ -142,8 +199,8 @@ void drawGame ( SDL_Window* window,
 						addToList(lasers, &obj, OBJ_JUMPSIZE);
 	
 						SDL_Rect rect_aux = {0};
-						addToList(&rect_list, &rect_aux, 3);
-						rect = (SDL_Rect*)rect_list.list;
+						addToList(&rectlist_laser, &rect_aux, 3);
+						rect_laser = (SDL_Rect*)rectlist_laser.list;
 
 						shoot_time[0] = shoot_time[1];
 						shoot_time[1] = SDL_GetTicks();
@@ -154,7 +211,9 @@ void drawGame ( SDL_Window* window,
 
 		if( (meteor_time[1] - meteor_time[0]) > CREATE_METEOR_INTERVAL ) {
 			createMeteor(&obj, user.position);
-			printf("%d %d %.2f\n", obj.position.x,obj.position.y, obj.ang);
+
+//			printf("%d %d %.2f\n", obj.position.x,obj.position.y, obj.ang);
+
 			obj.initPoint.x = obj.position.x;
 			obj.initPoint.y = obj.position.y;
 			obj.dirVector.x = sin(obj.ang*M_PI/180) * MOVEMENT_INCREMENT_METEOR;
@@ -164,8 +223,8 @@ void drawGame ( SDL_Window* window,
 			addToList(meteors, &obj, OBJ_JUMPSIZE);
 
 			SDL_Rect rect_aux = {0};
-			addToList(&rect_list, &rect_aux, 3);
-			rect = (SDL_Rect*)rect_list.list;
+			addToList(&rectlist_meteor, &rect_aux, 3);
+			rect_meteor = (SDL_Rect*)rectlist_meteor.list;
 
 			meteor_time[0] = meteor_time[1];
 			meteor_time[1] = SDL_GetTicks();
@@ -183,101 +242,131 @@ void drawGame ( SDL_Window* window,
 		if( user.position.y < 0 ) user.position.y = 0;
 		if( user.position.y > WINDOW_SIZE_Y ) user.position.y = WINDOW_SIZE_Y;
 
+		rect_nome.x = user.position.x - rect_nome.w/2;
+		rect_nome.y = user.position.y + IMG_NAVE_H/2;
+
 		updateList(users, user_id, &user);
 
-		i = users->len + meteors->len + lasers->len -1;
-		while( i >= users->len + meteors->len ) {
-			int err = getFromList(lasers, i - users->len - meteors->len, &obj);
-			if( err < 0 ) memset(&obj, 0, sizeof(Obj)); // zera
+		i = lasers->len - 1;
+		for( i = 0; i < lasers->len; i++ ) {
+			if( getFromList(lasers, i, &obj) < 0 ) continue; // zera
 
 			obj.r++;
 
 			obj.position.x = obj.initPoint.x + obj.dirVector.x * obj.r;
 			obj.position.y = obj.initPoint.y + obj.dirVector.y * obj.r;
 
-			if( insidePoint2( obj.position, -WINDOW_BORDER, -WINDOW_BORDER, WINDOW_SIZE_X + WINDOW_BORDER, WINDOW_SIZE_Y + WINDOW_BORDER ) ) {
-				rect[i].x = obj.position.x - laser_center.x;
-				rect[i].y = obj.position.y - laser_center.y;
-				rect[i].w = IMG_LASER_W;
-				rect[i].h = IMG_LASER_H;
-				SDL_RenderCopyEx( renderer, main_texture[TEXTURE_LASER], NULL, &(rect[i]), obj.ang, &laser_center, SDL_FLIP_NONE );
-				if( err >= 0 ) updateList(lasers, i - users->len - meteors->len, &obj);
+			if( insidePoint2( obj.position, -WINDOW_BORDER, -WINDOW_BORDER,
+					WINDOW_SIZE_X + WINDOW_BORDER, WINDOW_SIZE_Y + WINDOW_BORDER ) ) {
+				rect_laser[i].x = obj.position.x - laser_center.x;
+				rect_laser[i].y = obj.position.y - laser_center.y;
+				rect_laser[i].w = IMG_LASER_W;
+				rect_laser[i].h = IMG_LASER_H;
 
-				int e;
-				Obj meteor_aux;
-				for( e = 0; e < meteors->len; e++ ) {
-					int err = getFromList(meteors, e, &meteor_aux);
-					if( err < 0 ) memset(&meteor_aux, 0, sizeof(Obj)); // zera
-					if(contact(obj.position, meteor_aux.position, IMG_LASER_W/2, IMG_METEOR_W/2)) {
-						printf("METEORO DESTRUIDO");
-						removeFromList( meteors, e );
-						removeFromList( &rect_list, i );
-						removeFromList( &rect_list, i-1 );
+				SDL_RenderCopyEx( renderer, main_texture[TEXTURE_LASER], NULL,
+							&(rect_laser[i]), obj.ang, &laser_center, SDL_FLIP_NONE );
+
+				updateList(lasers, i, &obj);
+
+				// colisão com meteoro
+				int j;
+				for( j = 0; j < meteors->len; j++ ) {
+					Obj meteor;
+					if( getFromList(meteors, j, &meteor) < 0 ) continue;
+
+					if( contact(obj.position, meteor.position, IMG_LASER_W/2, IMG_METEOR_W/2) ) {
+						user.score += SCORE_DEST_METEOR;
+						scoreHasChanged = 1;
+
+						removeFromList( lasers, i );
+						removeFromList( &rectlist_laser, i );
+						removeFromList( meteors, j );
+						removeFromList( &rectlist_meteor, j );
 					}
 				}
 			} else {
-				removeFromList( lasers, i - users->len - meteors->len );
-				removeFromList( &rect_list, i );
+				removeFromList( lasers, i );
+				removeFromList( &rectlist_laser, i );
 			}
-			i--;
 		}
 
+		updateList(users, user_id, &user);
 
-		i = users->len + meteors->len -1;
-		while( i >= users->len ) {
-			int err = getFromList(meteors, i - users->len, &obj);
-			if( err < 0 ) memset(&obj, 0, sizeof(Obj)); // zera
+		for( i = 0; i < meteors->len; i++ ) {
+			if( getFromList(meteors, i, &obj) < 0 ) continue;
 
 			obj.r++;
 
 			obj.position.x = obj.initPoint.x + obj.dirVector.x * obj.r;
 			obj.position.y = obj.initPoint.y + obj.dirVector.y * obj.r;
 
-			if( insidePoint2( obj.position, -WINDOW_BORDER, -WINDOW_BORDER, WINDOW_SIZE_X + WINDOW_BORDER, WINDOW_SIZE_Y + WINDOW_BORDER ) ) {
-				rect[i].x = obj.position.x - IMG_METEOR_W/2;
-				rect[i].y = obj.position.y - IMG_METEOR_H/2;
-				rect[i].w = IMG_METEOR_W;
-				rect[i].h = IMG_METEOR_H;
-				SDL_RenderCopy( renderer, main_texture[TEXTURE_METEOR], NULL, &(rect[i]) );
-				if( err >= 0 ) updateList(meteors, i - users->len, &obj);
-			} else {
-				removeFromList( meteors, i - users->len );
-				removeFromList( &rect_list, i );
-			}
-			i--;
-		}
+			if( insidePoint2( obj.position, -WINDOW_BORDER, -WINDOW_BORDER,
+					WINDOW_SIZE_X + WINDOW_BORDER, WINDOW_SIZE_Y + WINDOW_BORDER ) ) {
+				rect_meteor[i].x = obj.position.x - IMG_METEOR_W/2;
+				rect_meteor[i].y = obj.position.y - IMG_METEOR_H/2;
+				rect_meteor[i].w = IMG_METEOR_W;
+				rect_meteor[i].h = IMG_METEOR_H;
 
+				SDL_RenderCopy( renderer, main_texture[TEXTURE_METEOR], NULL, &(rect_meteor[i]) );
+
+				updateList(meteors, i, &obj);
+			} else {
+				removeFromList( meteors, i );
+				removeFromList( &rectlist_meteor, i );
+			}
+		}
 
 		for( i = 0; i < users->len; i++ ) {
-			if( getFromList(users, i, &user) < 0 ) memset(&user, 0, sizeof(User)); // zera
+			if( getFromList(users, i, &user) < 0 ) continue;
 
-			rect[i].x = user.position.x - nave_center.x;
-			rect[i].y = user.position.y - nave_center.y;
-			rect[i].w = IMG_NAVE_W;
-			rect[i].h = IMG_NAVE_H;
-//			printf("%d %d %d %d %d\n", i, rect[i].x, rect[i].y, rect[i].w, rect[i].h);
+			rect_user[i].x = user.position.x - nave_center.x;
+			rect_user[i].y = user.position.y - nave_center.y;
+			rect_user[i].w = IMG_NAVE_W;
+			rect_user[i].h = IMG_NAVE_H;
 
-			int e;
-			for( e = 0; e < meteors->len; e++ ) {
-				int err = getFromList(meteors, e, &obj);
-				if( err < 0 ) memset(&obj, 0, sizeof(Obj)); // zera
-				if(contact(user.position, obj.position, IMG_NAVE_W/2, IMG_METEOR_W/2)) {
-					printf("GAMEOVER");
+			int j;
+			for( j = 0; j < meteors->len; j++ ) {
+				if( getFromList(meteors, j, &obj) < 0 ) continue;
+
+				if( contact(user.position, obj.position, IMG_NAVE_W/2, IMG_METEOR_W/2) ) {
+					removeFromList( meteors, j );
+					removeFromList( &rectlist_meteor, j );
+					removeFromList( users, i );
+					removeFromList( &rectlist_user, i );
+					*screen = SCREEN_GAMEOVER;
 				}
 			}
-
 			if( game_type == GAME_TYPE_MULTI ) {
-				for( e = 0; e < lasers->len; e++ ) {
-					int err = getFromList(lasers, e, &obj);
-					if( err < 0 ) memset(&obj, 0, sizeof(Obj)); // zera
-					if(contact(user.position, obj.position, IMG_NAVE_W/2, IMG_LASER_W/2)) {
-						printf("GAMEOVER");
+				for( j = 0; j < lasers->len; j++ ) {
+					if( getFromList(lasers, j, &obj) < 0 ) continue;
+
+					if( contact(user.position, obj.position, IMG_NAVE_W/2, IMG_LASER_W/2) ) {
+						removeFromList( lasers, j );
+						removeFromList( &rectlist_laser, j );
+						removeFromList( users, i );
+						removeFromList( &rectlist_user, i );
+
+						*screen = SCREEN_GAMEOVER;
 					}
 				}
 			}
 
-			SDL_RenderCopyEx( renderer, main_texture[TEXTURE_NAVE], NULL, &(rect[i]), user.ang, &nave_center, SDL_FLIP_NONE );
+			SDL_RenderCopyEx( renderer, main_texture[TEXTURE_NAVE], NULL, &(rect_user[i]), user.ang, &nave_center, SDL_FLIP_NONE );
 		}
+
+		if( scoreHasChanged ) {
+			SDL_DestroyTexture(score);
+			getFromList(users, user_id, &user);
+			snprintf(char_score, MAX_DIGITS_SCORE, "%d", user.score);
+			score = LoadTxtTexture(renderer, font[FONT_INDEX_BIG], char_score, &color, texture);
+			if(SDL_QueryTexture(score, NULL, NULL, &(rect_score.w), &(rect_score.h)) < 0) {
+				fprintf(stderr, "%s\n", SDL_GetError());
+			}
+			scoreHasChanged = 0;
+		}
+
+		SDL_RenderCopy( renderer, score, NULL, &rect_score );
+		SDL_RenderCopy( renderer, nome, NULL, &rect_nome );
 
 		SDL_RenderPresent(renderer);
 		SDL_RenderClear(renderer);
@@ -285,5 +374,10 @@ void drawGame ( SDL_Window* window,
 		runtime[1] = SDL_GetTicks();
 		ctrlFramerate((runtime[1] - runtime[0]));
 	}
+
+	free(rectlist_user.list);
+	free(rectlist_meteor.list);
+	free(rectlist_laser.list);
+
 	destroyNonMainTexture(texture);
 }

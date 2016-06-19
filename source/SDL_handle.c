@@ -111,17 +111,32 @@ void ctrlFramerate( float delta ) {
 		SDL_Delay(5);
 }
 
-void closeALL( SDL_Window* window, SDL_Renderer* renderer, List* texture, TTF_Font** font ) {
+void closeALL(  SDL_Window* window,
+				SDL_Renderer* renderer,
+				List* texture,
+				TTF_Font** font,
+				List* users,
+				List* meteors,
+				List* lasers ) {
 	int i;
-	for( i = 0; i < texture->len; i++ ) {
-		SDL_Texture* aux = NULL;
-		getFromList(texture, i, &aux);
-		if(aux) SDL_DestroyTexture(aux);
+	if( texture ) {
+		for( i = 0; i < texture->len; i++ ) {
+			SDL_Texture* aux = NULL;
+			getFromList(texture, i, &aux);
+			if(aux) SDL_DestroyTexture(aux);
+		}
+		if(texture->list) free(texture->list);
 	}
 
-	for( i = 0; i < ARRAY_NUM_FONT; i++) {
-		if(font[i]) TTF_CloseFont(font[i]);
+	if( font ) {
+		for( i = 0; i < ARRAY_NUM_FONT; i++) {
+			if(font[i]) TTF_CloseFont(font[i]);
+		}
 	}
+
+	if( users ) free( users->list );
+	if( meteors ) free( meteors->list );
+	if( lasers ) free( lasers->list );
 
 	if(renderer) SDL_DestroyRenderer(renderer);
 	if(window) SDL_DestroyWindow(window);

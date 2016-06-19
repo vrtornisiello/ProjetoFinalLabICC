@@ -15,6 +15,8 @@ void drawMenu(  SDL_Window* window,
 				List* texture,
 				TTF_Font* font[],
 				List* users,
+				List* meteors,
+				List* lasers,
 				clock_t* runtime,
 				int* screen ) {
 	SDL_Color color = {255,255,255};
@@ -65,10 +67,10 @@ void drawMenu(  SDL_Window* window,
 	Point mouse;
 	SDL_Event e;
 
-	runtime[1] = clock();
-	ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC); // delay para considerar a mudança de página
+	runtime[1] = SDL_GetTicks();
+	ctrlFramerate( runtime[1] - runtime[0] ); // delay para considerar a mudança de página
 	while( *screen == SCREEN_MENU ) {
-		runtime[0] = clock();
+		runtime[0] = SDL_GetTicks();
 
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
 	    SDL_RenderClear( renderer ); // Limpa a tela
@@ -76,7 +78,7 @@ void drawMenu(  SDL_Window* window,
 		while( SDL_PollEvent(&e) ) {
 			switch( e.type ) {
 				case SDL_QUIT:
-					closeALL(window, renderer, texture, font);
+					closeALL(window, renderer, texture, font, users, meteors, lasers);
 					exit(0);
 				break;
 			    case SDL_MOUSEMOTION:
@@ -100,7 +102,7 @@ void drawMenu(  SDL_Window* window,
 						if(users->len > 0)
 							*screen = SCREEN_GAME;
 					} else if( selectedButton == 5 ) {
-						closeALL(window, renderer, texture, font);
+						closeALL(window, renderer, texture, font, users, meteors, lasers);
 						exit(0);
 					}
 				break;
@@ -131,8 +133,8 @@ void drawMenu(  SDL_Window* window,
 		}
 		SDL_RenderPresent(renderer);
 
-		runtime[1] = clock();
-		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC); // delay
+		runtime[1] = SDL_GetTicks();
+		ctrlFramerate( runtime[1] - runtime[0] ); // delay
 	}
 
 	destroyNonMainTexture( texture ); // Destroi texturas criadas nessa função

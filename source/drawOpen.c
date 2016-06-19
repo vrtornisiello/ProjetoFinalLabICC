@@ -5,7 +5,8 @@ void drawOpen(  SDL_Window* window,
 				List* texture,
 				TTF_Font* font[],
 				List* users,
-				List* objs,
+				List* meteors,
+				List* lasers,
 				clock_t* runtime,
 				int* screen ) {
 
@@ -88,10 +89,10 @@ void drawOpen(  SDL_Window* window,
 
 	char message[MAX_MSG_INPUT] = "No Errors.";
 
-	runtime[1] = clock();
-	ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC); // delay para considerar a mudança de página
+	runtime[1] = SDL_GetTicks();
+	ctrlFramerate( runtime[1] - runtime[0] ); // delay para considerar a mudança de página
 	while( *screen == SCREEN_OPEN ) {
-		runtime[0] = clock();
+		runtime[0] = SDL_GetTicks();
 
 	    SDL_SetRenderDrawColor( renderer, 26, 26, 26, 255 ); // Fundo
 	    SDL_RenderClear( renderer ); // Limpa a tela
@@ -99,7 +100,7 @@ void drawOpen(  SDL_Window* window,
 		while(SDL_PollEvent(&e)) {
 			switch(e.type) {
 				case SDL_QUIT:
-					closeALL(window, renderer, texture, font);
+					closeALL(window, renderer, texture, font, users, meteors, lasers);
 					exit(0);
 				break;
 			    case SDL_MOUSEMOTION:
@@ -114,12 +115,13 @@ void drawOpen(  SDL_Window* window,
 						typing = 0;
 					}
 					if( selectButton == 0 ) {
+						SDL_StopTextInput();
 						*screen = SCREEN_MENU;
 					} else if( selectButton == 1 ) {
 						if( inputLen > 0 ) {
-							switch( openUser(users, objs, input, openFlags) ) {
+							switch( openUser(users, meteors, lasers, input, openFlags) ) {
 								case -1:			  
-									strncpy(message, "Clique em Abrir para sobrescrever.", MAX_MSG_INPUT);
+									strncpy(message, "Clique em Abrir para sobrescrever o usuario.", MAX_MSG_INPUT);
 									openFlags = OPEN_OVERWRITE;
 									hasChangedInput = 1;
 								break;
@@ -132,6 +134,7 @@ void drawOpen(  SDL_Window* window,
 									hasChangedInput = 1;
 								break;
 								default:
+									SDL_StopTextInput();
 									*screen = SCREEN_GAME;
 								break;
 							}
@@ -156,7 +159,7 @@ void drawOpen(  SDL_Window* window,
 					}
 				break;
 				case SDL_TEXTINPUT:
-					if(inputLen < MAX_CHAR_INPUT) {
+					if(inputLen < MAX_CHAR_INPUT-1) {
 						strncpy(input + inputLen, e.text.text, MAX_CHAR_INPUT-inputLen-1);
 						inputLen = strlen(input);
 						strncpy(message, "No Errors.", MAX_MSG_INPUT);
@@ -225,8 +228,8 @@ void drawOpen(  SDL_Window* window,
 
 		SDL_RenderPresent(renderer);
 
-		runtime[1] = clock();
-		ctrlFramerate((runtime[1] - runtime[0])*1000/CLOCKS_PER_SEC);
+		runtime[1] = SDL_GetTicks();
+		ctrlFramerate( runtime[1] - runtime[0] );
 	}
 	destroyNonMainTexture(texture);
 }

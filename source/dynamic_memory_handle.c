@@ -8,6 +8,7 @@ int addToList( List* list, void* elem, int jumpSize ) {
 			return 0;
 		} else {
 			list->size += jumpSize;
+			printf("%d\n", list->size);
 			void* aux = realloc(list->list, (list->size)*(list->elemSize));
 			if( aux ) {
 				list->list = aux;

@@ -57,13 +57,13 @@
 #define TEXTURE_METEOR    1
 #define TEXTURE_LASER     2
 
-#define SCREEN_MENU   0
-#define SCREEN_SINGLE 1
-#define SCREEN_MULTI  2
-#define SCREEN_GAME   3
-#define SCREEN_SAVE   4
-#define SCREEN_OPEN   5
-
+#define SCREEN_MENU     0
+#define SCREEN_SINGLE   1
+#define SCREEN_MULTI    2
+#define SCREEN_GAME     3
+#define SCREEN_SAVE     4
+#define SCREEN_OPEN     5
+#define SCREEN_GAMEOVER 6
 #define OBJ_TYPE_METEOR 0
 #define OBJ_TYPE_LASER  1
 
@@ -72,15 +72,14 @@
 #define LEFT  2
 #define RIGHT 3
 
+#define MAX_DIGITS_SCORE 5
+#define SCORE_DEST_METEOR 50
 
-
-#define MOVEMENT_INCREMENT_METEOR  30
-#define MOVEMENT_INCREMENT_LASER  40
-#define MOVEMENT_INCREMENT_USER  20
-#define SHOOT_INTERVAL 1000
+#define MOVEMENT_INCREMENT_METEOR  10
+#define MOVEMENT_INCREMENT_LASER  20
+#define MOVEMENT_INCREMENT_USER  10
+#define SHOOT_INTERVAL 100
 #define CREATE_METEOR_INTERVAL 300
-
-
 
 #define OPEN_NOFLAGS   0
 #define OPEN_OVERWRITE 1
@@ -90,6 +89,7 @@
 #define ERROR_INIT_LIST   -3
 
 #define GAME_TYPE_SINGLE 0
+#define GAME_TYPE_MULTI  1
 
 typedef struct _point {
 	int x;
@@ -117,6 +117,7 @@ typedef struct _obj {
 
 typedef struct _nave {
 	Point position;
+	int score;
 	float ang;
 	int active;
 	char nome[MAX_CHAR_NOME]; // 10 letras
@@ -129,8 +130,14 @@ typedef struct _list{
 	unsigned int elemSize;
 } List;
 
+struct save_struct {
+	int len_users;
+	int len_meteors;
+	int len_lasers;
+};
+
 void initGraphics( SDL_Window** window, SDL_Renderer** renderer, List* texture, TTF_Font** font );
-void initList( List* users, List* objs );
+void initList( List* users, List* meteors, List* lasers );
 
 int initSDL(SDL_Window** window, SDL_Renderer** renderer);
 SDL_Texture* LoadImageTexture(SDL_Renderer* renderer, char* path, List* texture);
@@ -138,7 +145,13 @@ SDL_Texture* LoadTxtTexture(SDL_Renderer* renderer, TTF_Font* font, char* txt, S
 void destroyNonMainTexture( List* texture );
 void destroyLastTexture( List* texture );
 void ctrlFramerate( float delta );
-void closeALL( SDL_Window* window, SDL_Renderer* renderer, List* texture, TTF_Font** font );
+void closeALL(  SDL_Window* window,
+				SDL_Renderer* renderer,
+				List* texture,
+				TTF_Font** font,
+				List* users,
+				List* meteors,
+				List* lasers );
 
 void getMaxDim( Dimension* dim, int len, Dimension* dest );
 void drawMenu(  SDL_Window* window,
@@ -146,49 +159,70 @@ void drawMenu(  SDL_Window* window,
 				List* texture,
 				TTF_Font* font[],
 				List* users,
+				List* meteors,
+				List* lasers,
 				clock_t* runtime,
 				int* screen );
+
 void drawInitUser(  SDL_Window* window,
-				SDL_Renderer* renderer,
-				List* texture,
-				TTF_Font* font[],
-				List* users,
-				clock_t* runtime,
-				int* screen );
+					SDL_Renderer* renderer,
+					List* texture,
+					TTF_Font* font[],
+					List* users,
+					List* meteors,
+					List* lasers,
+					clock_t* runtime,
+					int* screen );
+
 void drawMultiplayer();//-----------------------------------------------------------
+
 void drawOpen(  SDL_Window* window,
 				SDL_Renderer* renderer,
 				List* texture,
 				TTF_Font* font[],
 				List* users,
-				List* objs,
+				List* meteors,
+				List* lasers,
 				clock_t* runtime,
 				int* screen );
-
-int addToList( List* list, void* elem, int jumpSize );
-int removeFromList( List* list, int elemId );
-int getFromList( List* list, int elemId, void* dest );
-int updateList( List* list, int elemId, void* update );
 
 void drawSave(  SDL_Window* window,
 				SDL_Renderer* renderer,
 				List* texture,
 				TTF_Font* font[],
 				List* users,
-				List* objs,
+				List* meteors,
+				List* lasers,
 				clock_t* runtime,
 				int* screen );
+
 void drawGame(  SDL_Window* window,
 				SDL_Renderer* renderer,
 				List* texture,
 				TTF_Font* font[],
 				List* users,
-				List* objs,
+				List* meteors,
+				List* lasers,
 				clock_t* runtime,
 				int* screen );
+
+void drawGameOver(  SDL_Window* window,
+					SDL_Renderer* renderer,
+					List* texture,
+					TTF_Font* font[],
+					List* users,
+					List* meteors,
+					List* lasers,
+					clock_t* runtime,
+					int* screen );
+
+int addToList( List* list, void* elem, int jumpSize );
+int removeFromList( List* list, int elemId );
+int getFromList( List* list, int elemId, void* dest );
+int updateList( List* list, int elemId, void* update );
 
 int insidePoint( Point p, SDL_Rect* rect );
 int insidePoint2( Point p, int x, int y, int w, int h );
 
-int saveUser( List* users, List* objs, char* path );
-int openUser( List* users, List* objs, char* path, int flags );
+int saveUser( List* users, List* meteors, List* lasers, char* path );
+int openUser( List* users, List* meteors, List* lasers, char* path, int flags );
