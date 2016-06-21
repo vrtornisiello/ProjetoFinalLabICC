@@ -131,6 +131,7 @@ typedef struct _list{
 } List;
 
 struct save_struct {
+	int user_id;
 	int len_users;
 	int len_meteors;
 	int len_lasers;
@@ -162,7 +163,9 @@ void drawMenu(  SDL_Window* window,
 				List* meteors,
 				List* lasers,
 				clock_t* runtime,
-				int* screen );
+				int* screen,
+				int* game_type );
+
 
 void drawInitUser(  SDL_Window* window,
 					SDL_Renderer* renderer,
@@ -172,9 +175,22 @@ void drawInitUser(  SDL_Window* window,
 					List* meteors,
 					List* lasers,
 					clock_t* runtime,
-					int* screen );
+					int* screen,
+					int* game_type );
 
-void drawMultiplayer();//-----------------------------------------------------------
+
+void drawMultiplayer(SDL_Window* window,
+					 SDL_Renderer* renderer,
+					 List* texture,
+					 TTF_Font* font[],
+					 List* users,
+					 List* meteors,
+					 List* lasers,
+					 clock_t* runtime,
+					 int* screen,
+					 int* game_type,
+					 int* socket_d,
+					 int* user_id );
 
 void drawOpen(  SDL_Window* window,
 				SDL_Renderer* renderer,
@@ -184,7 +200,8 @@ void drawOpen(  SDL_Window* window,
 				List* meteors,
 				List* lasers,
 				clock_t* runtime,
-				int* screen );
+				int* screen,
+				int* game_type );
 
 void drawSave(  SDL_Window* window,
 				SDL_Renderer* renderer,
@@ -204,7 +221,10 @@ void drawGame(  SDL_Window* window,
 				List* meteors,
 				List* lasers,
 				clock_t* runtime,
-				int* screen );
+				int* screen,
+				int* game_type,
+				int socket_d,
+				int user_id );
 
 void drawGameOver(  SDL_Window* window,
 					SDL_Renderer* renderer,
@@ -214,7 +234,8 @@ void drawGameOver(  SDL_Window* window,
 					List* meteors,
 					List* lasers,
 					clock_t* runtime,
-					int* screen );
+					int* screen,
+					int* game_type );
 
 int addToList( List* list, void* elem, int jumpSize );
 int removeFromList( List* list, int elemId );
@@ -226,3 +247,9 @@ int insidePoint2( Point p, int x, int y, int w, int h );
 
 int saveUser( List* users, List* meteors, List* lasers, char* path );
 int openUser( List* users, List* meteors, List* lasers, char* path, int flags );
+
+
+int initConnection( int* socket_d, char* ip_addr, unsigned int port, List* users, List* meteors, List* lasers, int* user_id );
+int setServerInfo( int* socket_d, List* users, List* meteors, List* lasers, int* user_id );
+int sendServerInfo( int* socket_d, User* user, Obj* laser, int user_id );
+void closeConnection( int* socket_d );

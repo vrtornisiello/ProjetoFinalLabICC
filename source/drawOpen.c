@@ -8,7 +8,8 @@ void drawOpen(  SDL_Window* window,
 				List* meteors,
 				List* lasers,
 				clock_t* runtime,
-				int* screen ) {
+				int* screen,
+				int* game_type ) {
 
 	SDL_Color color = {255,255,255,255};
 	SDL_Color red = {255,0,0,255};
@@ -135,6 +136,7 @@ void drawOpen(  SDL_Window* window,
 								break;
 								default:
 									SDL_StopTextInput();
+									*game_type = GAME_TYPE_SINGLE;
 									*screen = SCREEN_GAME;
 								break;
 							}

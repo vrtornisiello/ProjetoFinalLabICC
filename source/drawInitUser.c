@@ -8,7 +8,8 @@ void drawInitUser(  SDL_Window* window,
 					List* meteors,
 					List* lasers,
 					clock_t* runtime,
-					int* screen ) {
+					int* screen,
+					int* game_type ) {
 
 	SDL_Color color = {255,255,255,255};
 	SDL_Color red = {255,0,0,255};
@@ -121,6 +122,7 @@ void drawInitUser(  SDL_Window* window,
 								hasChangedInput = 1;
 							} else {
 								SDL_StopTextInput();
+								*game_type = GAME_TYPE_SINGLE;
 								*screen = SCREEN_GAME;
 							}
 						}
@@ -134,7 +136,7 @@ void drawInitUser(  SDL_Window* window,
 					}
 				break;
 				case SDL_TEXTINPUT:
-					if(inputLen < MAX_CHAR_INPUT-1) {
+					if(inputLen < MAX_CHAR_NOME - 1) {
 						strncpy(input + inputLen, e.text.text, MAX_CHAR_NOME-inputLen-1);
 						inputLen = strlen(input);
 						strncpy(message, "No Errors.", MAX_MSG_INPUT);
@@ -159,7 +161,6 @@ void drawInitUser(  SDL_Window* window,
 			}
 			input_rect.x = (WINDOW_SIZE_X - input_rect.w) / 2;
 			input_rect.y = input_background.y;
-			hasChangedInput = 0;
 
 			txt[3] = LoadTxtTexture(renderer, font[FONT_INDEX_SML], message, &red, texture);
 			if(SDL_QueryTexture(txt[3], NULL, NULL, &(txt_rect[3].w), &(txt_rect[3].h)) < 0) {
@@ -167,8 +168,10 @@ void drawInitUser(  SDL_Window* window,
 			}
 			txt_rect[3].x = (WINDOW_SIZE_X - txt_rect[3].w)/2;
 			txt_rect[3].y = (WINDOW_SIZE_Y - txt_rect	[3].h)/2 + 50;
+			hasChangedInput = 0;
 		}
 		SDL_RenderCopy(renderer, inputTexture, NULL, &input_rect);
+		SDL_RenderCopy(renderer, txt[3], NULL, &(txt_rect[3]));
 
 		if( insidePoint( mouse, &input_background ) ) inputSelected = 1;
 		else inputSelected = 0;

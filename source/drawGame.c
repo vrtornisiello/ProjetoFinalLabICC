@@ -36,13 +36,18 @@ void createMeteor( Obj* obj, Point user ) {
 
 void drawGame(  SDL_Window* window,
 				SDL_Renderer* renderer,
-				List* texture,
+				List* texture, 	 	
 				TTF_Font* font[],
 				List* users,
 				List* meteors,
 				List* lasers,
 				clock_t* runtime,
-				int* screen ) {
+				int* screen,
+				int* game_type,
+				int socket_d,
+				int user_id ) {
+
+//	int game_type = GAME_TYPE_SINGLE;
 
 	List rectlist_user;
 	rectlist_user.len      = users->len;
@@ -92,15 +97,18 @@ void drawGame(  SDL_Window* window,
 
 	User user = {0}; // aux
 	Obj obj   = {0}; // aux
-	for( i = 0; i < users->len; i++ ) {
-		getFromList(users, i, &user);
 
-		if( !user.active ) {
-			user.position.x = IMG_NAVE_W/2 + rand()%(WINDOW_SIZE_X - IMG_NAVE_W);
-			user.position.y = IMG_NAVE_H/2 + rand()%(WINDOW_SIZE_Y - IMG_NAVE_H);
-			user.active = 1;
+	if( *game_type == GAME_TYPE_SINGLE ) {
+		for( i = 0; i < users->len; i++ ) {
+			getFromList(users, i, &user);
 
-			updateList(users, i, &user);
+			if( !user.active ) {
+				user.position.x = IMG_NAVE_W/2 + rand()%(WINDOW_SIZE_X - IMG_NAVE_W);
+				user.position.y = IMG_NAVE_H/2 + rand()%(WINDOW_SIZE_Y - IMG_NAVE_H);
+				user.active = 1;
+
+				updateList(users, i, &user);
+			}
 		}
 	}
 
@@ -119,8 +127,6 @@ void drawGame(  SDL_Window* window,
 	Point mouse = {0};
 	int key[4] = {0}; // left right ....
 
-	int user_id = 0; //---------------------------------------
-	int game_type = GAME_TYPE_SINGLE;// ----------------------
 	uint32_t shoot_time[2];
 	uint32_t meteor_time[2];
 	shoot_time[0] = 0;
@@ -179,7 +185,9 @@ void drawGame(  SDL_Window* window,
 					if(event.key.keysym.sym == SDLK_DOWN) key[DOWN] = 0;
 					if(event.key.keysym.sym == SDLK_LEFT) key[LEFT] = 0;
 					if(event.key.keysym.sym == SDLK_RIGHT) key[RIGHT] = 0;
-					if(event.key.keysym.sym == SDLK_s) *screen = SCREEN_MENU;
+					if(event.key.keysym.sym == SDLK_ESCAPE) {
+						if( *game_type == GAME_TYPE_SINGLE )	*screen = SCREEN_MENU;
+					}
 				break;
 
 				case SDL_MOUSEMOTION:
@@ -196,11 +204,16 @@ void drawGame(  SDL_Window* window,
 						obj.dirVector.y = -cos(user.ang*M_PI/180) * MOVEMENT_INCREMENT_LASER;
 						obj.r = 0;
 						obj.type = OBJ_TYPE_LASER;
-						addToList(lasers, &obj, OBJ_JUMPSIZE);
+
+						if( *game_type == GAME_TYPE_SINGLE ) {
+							addToList(lasers, &obj, OBJ_JUMPSIZE);
 	
-						SDL_Rect rect_aux = {0};
-						addToList(&rectlist_laser, &rect_aux, 3);
-						rect_laser = (SDL_Rect*)rectlist_laser.list;
+							SDL_Rect rect_aux = {0};
+							addToList(&rectlist_laser, &rect_aux, 3);
+							rect_laser = (SDL_Rect*)rectlist_laser.list;
+						} else if( *game_type == GAME_TYPE_MULTI ) {
+							sendServerInfo( &socket_d, NULL, &obj, user_id );
+						}
 
 						shoot_time[0] = shoot_time[1];
 						shoot_time[1] = SDL_GetTicks();
@@ -209,25 +222,27 @@ void drawGame(  SDL_Window* window,
 			}
 		}
 
-		if( (meteor_time[1] - meteor_time[0]) > CREATE_METEOR_INTERVAL ) {
-			createMeteor(&obj, user.position);
+		if( *game_type == GAME_TYPE_SINGLE ) {
+			if( (meteor_time[1] - meteor_time[0]) > CREATE_METEOR_INTERVAL ) {
+				createMeteor(&obj, user.position);
 
-//			printf("%d %d %.2f\n", obj.position.x,obj.position.y, obj.ang);
+	//			printf("%d %d %.2f\n", obj.position.x,obj.position.y, obj.ang);
 
-			obj.initPoint.x = obj.position.x;
-			obj.initPoint.y = obj.position.y;
-			obj.dirVector.x = sin(obj.ang*M_PI/180) * MOVEMENT_INCREMENT_METEOR;
-			obj.dirVector.y = -cos(obj.ang*M_PI/180) * MOVEMENT_INCREMENT_METEOR;
-			obj.r = 0;
-			obj.type = OBJ_TYPE_METEOR;
-			addToList(meteors, &obj, OBJ_JUMPSIZE);
+				obj.initPoint.x = obj.position.x;
+				obj.initPoint.y = obj.position.y;
+				obj.dirVector.x = sin(obj.ang*M_PI/180) * MOVEMENT_INCREMENT_METEOR;
+				obj.dirVector.y = -cos(obj.ang*M_PI/180) * MOVEMENT_INCREMENT_METEOR;
+				obj.r = 0;
+				obj.type = OBJ_TYPE_METEOR;
+				addToList(meteors, &obj, OBJ_JUMPSIZE);
 
-			SDL_Rect rect_aux = {0};
-			addToList(&rectlist_meteor, &rect_aux, 3);
-			rect_meteor = (SDL_Rect*)rectlist_meteor.list;
+				SDL_Rect rect_aux = {0};
+				addToList(&rectlist_meteor, &rect_aux, 3);
+				rect_meteor = (SDL_Rect*)rectlist_meteor.list;
 
-			meteor_time[0] = meteor_time[1];
-			meteor_time[1] = SDL_GetTicks();
+				meteor_time[0] = meteor_time[1];
+				meteor_time[1] = SDL_GetTicks();
+			}
 		}
 
 		user.ang = -90 + (atan2(user.position.y - mouse.y, user.position.x - mouse.x))*180/M_PI;
@@ -246,10 +261,14 @@ void drawGame(  SDL_Window* window,
 		rect_nome.y = user.position.y + IMG_NAVE_H/2;
 
 		updateList(users, user_id, &user);
+		if( *game_type == GAME_TYPE_MULTI ) {
+			sendServerInfo( &socket_d, &user, NULL, user_id );
+			setServerInfo( &socket_d, users, meteors, lasers, &user_id );
+		}
 
 		i = lasers->len - 1;
 		for( i = 0; i < lasers->len; i++ ) {
-			if( getFromList(lasers, i, &obj) < 0 ) continue; // zera
+			if( getFromList(lasers, i, &obj) < 0 ) continue;
 
 			obj.r++;
 
@@ -336,7 +355,7 @@ void drawGame(  SDL_Window* window,
 					*screen = SCREEN_GAMEOVER;
 				}
 			}
-			if( game_type == GAME_TYPE_MULTI ) {
+			if( *game_type == GAME_TYPE_MULTI ) {
 				for( j = 0; j < lasers->len; j++ ) {
 					if( getFromList(lasers, j, &obj) < 0 ) continue;
 

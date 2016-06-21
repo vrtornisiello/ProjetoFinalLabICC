@@ -77,7 +77,7 @@ int openUser( List* users, List* meteors, List* lasers, char* path, int flags ) 
 			User user = {0};
 			while( save.len_users && (fread(&user, sizeof(user), 1, fd) == 1) ) {
 				if( addToList(users, &user, 1) < 0) {
-					fprintf(stderr, "Houve um erro ao adicionar o usuario.");
+					fprintf(stderr, "Houve um erro ao adicionar o usuario.\n");
 					return -3;
 				}
 				save.len_users--;
@@ -95,7 +95,7 @@ int openUser( List* users, List* meteors, List* lasers, char* path, int flags ) 
 			}
 			while( save.len_lasers && (fread( &obj, sizeof(obj), 1, fd ) == 1) ) {
 				addToList(lasers, &obj, OBJ_JUMPSIZE);
-				save.len_meteors--;
+				save.len_lasers--;
 			}
 			fclose(fd);
 			return 0;

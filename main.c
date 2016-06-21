@@ -1,4 +1,4 @@
-// Compilar com -lSDL2 -lSDL2_image -lSDL2_ttf
+// Compilar com -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm -lpthread
 #include"header.h"
 
 int main(char argc, char* argv[]) {
@@ -15,6 +15,9 @@ int main(char argc, char* argv[]) {
 	clock_t runtime[2] = {0, 0}; // início e fim de uma frame
 
 	SDL_Event e; // guarda eventos
+	int game_type;
+	int socket_d;
+	int user_id;
 	int screen = 0; // menu principal, single e multi, jogo, save, return
 	while( 1 ) {
 		runtime[0] = SDL_GetTicks();
@@ -31,19 +34,19 @@ int main(char argc, char* argv[]) {
 		}
 
 		if( screen == SCREEN_MENU )
-			drawMenu( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
+			drawMenu( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen, &game_type );
 		else if( screen == SCREEN_SINGLE )
-			drawInitUser( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
+			drawInitUser( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen, &game_type );
 		else if( screen == SCREEN_MULTI )
-			drawMultiplayer();
+			drawMultiplayer( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen, &game_type, &socket_d, &user_id );
 		else if( screen == SCREEN_GAME )
-			drawGame( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
+			drawGame( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen, &game_type, socket_d, user_id );
 		else if( screen == SCREEN_SAVE )
 			drawSave( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
 		else if( screen == SCREEN_OPEN )
-			drawOpen( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
+			drawOpen( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen, &game_type );
 		else if( screen == SCREEN_GAMEOVER )
-			drawGameOver( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen );
+			drawGameOver( window, renderer, &texture, font, &users, &meteors, &lasers, runtime, &screen, &game_type );
 
 		SDL_RenderPresent(renderer);
 

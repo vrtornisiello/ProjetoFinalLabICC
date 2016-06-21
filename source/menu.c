@@ -18,7 +18,8 @@ void drawMenu(  SDL_Window* window,
 				List* meteors,
 				List* lasers,
 				clock_t* runtime,
-				int* screen ) {
+				int* screen,
+				int* game_type ) {
 	SDL_Color color = {255,255,255};
 	SDL_Texture* txt[7] = {NULL};
 	txt[0] = LoadTxtTexture(renderer, font[FONT_INDEX_BIG], "Menu", &color, texture);
@@ -110,7 +111,7 @@ void drawMenu(  SDL_Window* window,
 		}
 
 		SDL_RenderCopy(renderer, txt[0], NULL, &(rect[0]));
-		if( users->len <= 0 ) {
+		if( users->len != 1 ) {
 			SDL_SetRenderDrawColor(renderer, 30,30,30,255);
 			SDL_RenderFillRect(renderer, &(background_rect[4]));
 		}
@@ -139,8 +140,3 @@ void drawMenu(  SDL_Window* window,
 
 	destroyNonMainTexture( texture ); // Destroi texturas criadas nessa função
 }
-
-void drawMultiplayer() {
-
-}
-

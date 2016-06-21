@@ -8,7 +8,8 @@ void drawGameOver(  SDL_Window* window,
 					List* meteors,
 					List* lasers,
 					clock_t* runtime,
-					int* screen ) {
+					int* screen,
+					int* game_type ) {
 
 	SDL_Color color = {255,255,255,255};
 	SDL_Texture* txt[4] = {NULL};
