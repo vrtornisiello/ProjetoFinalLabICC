@@ -185,9 +185,10 @@ void drawGame(  SDL_Window* window,
 					if((event.key.keysym.sym == SDLK_DOWN) || (event.key.keysym.sym == SDLK_s)) key[DOWN] = 0;
 					if((event.key.keysym.sym == SDLK_LEFT) || (event.key.keysym.sym == SDLK_a)) key[LEFT] = 0;
 					if((event.key.keysym.sym == SDLK_RIGHT) || (event.key.keysym.sym == SDLK_d)) key[RIGHT] = 0;
-					if(event.key.keysym.sym == SDLK_ESCAPE) *screen = SCREEN_MENU;
+					if(event.key.keysym.sym == SDLK_ESCAPE) {
+						if( *game_type == GAME_TYPE_SINGLE ) *screen = SCREEN_MENU;
+					}
 				break;
-
 				case SDL_MOUSEMOTION:
 					SDL_GetMouseState(&(mouse.x), &(mouse.y));
 				break;
